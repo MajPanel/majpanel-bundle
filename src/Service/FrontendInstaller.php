@@ -21,7 +21,6 @@ final class FrontendInstaller
     {
         $bundleDir = \dirname(__DIR__, 2);
         $files = [
-            $bundleDir.'/resources/frontend/webpack.config.js' => $this->projectDir.'/webpack.config.js',
             $bundleDir.'/postcss.config.js' => $this->projectDir.'/postcss.config.js',
             $bundleDir.'/tsconfig.json' => $this->projectDir.'/tsconfig.json',
             $bundleDir.'/assets/app.ts' => $this->projectDir.'/assets/majpanel.ts',
@@ -41,6 +40,13 @@ final class FrontendInstaller
             $installed[] = $target;
         }
 
+        if ($this->installWebpackConfig(
+            $bundleDir.'/resources/frontend/webpack.config.js',
+            $this->projectDir.'/webpack.config.js',
+        )) {
+            $installed[] = $this->projectDir.'/webpack.config.js';
+        }
+
         foreach ([
             $bundleDir.'/resources/frontend/package.json' => $this->projectDir.'/package.json',
             $bundleDir.'/assets/controllers.json' => $this->projectDir.'/assets/controllers.json',
@@ -51,6 +57,62 @@ final class FrontendInstaller
         }
 
         return array_values(array_unique($installed));
+    }
+
+    private function installWebpackConfig(string $source, string $target): bool
+    {
+        if (!is_file($target)) {
+            $this->filesystem->copy($source, $target);
+
+            return true;
+        }
+
+        $contents = (string) file_get_contents($target);
+        $updated = $contents;
+
+        if (!str_contains($updated, ".addEntry('majpanel'")) {
+            $updated = preg_replace(
+                '/(\s+\.addEntry\([^\n]+\)\R)/',
+                "$1    .addEntry('majpanel', './assets/majpanel.ts')\n",
+                $updated,
+                1,
+            ) ?? $updated;
+        }
+
+        if (!str_contains($updated, 'enableStimulusBridge(')) {
+            $updated = preg_replace(
+                '/(\s+\.addEntry\(\'majpanel\'[^\n]+\)\R)/',
+                "$1    .enableStimulusBridge('./assets/controllers.json')\n",
+                $updated,
+                1,
+            ) ?? $updated;
+        }
+
+        if (!str_contains($updated, 'enablePostCssLoader(')) {
+            $updated = preg_replace(
+                '/(\s+\.enableSourceMaps\()/',
+                "\n    .enablePostCssLoader()\n$1",
+                $updated,
+                1,
+            ) ?? $updated;
+        }
+
+        if (!str_contains($updated, 'enableTypeScriptLoader(')) {
+            $updated = preg_replace(
+                '/\R;\R/',
+                "\n    .enableTypeScriptLoader()\n;\n",
+                $updated,
+                1,
+            ) ?? $updated;
+        }
+
+        if ($updated === $contents) {
+            return false;
+        }
+
+        $this->filesystem->dumpFile($target, $updated);
+
+        return true;
     }
 
     private function mergeJsonFile(string $source, string $target): bool

@@ -28,6 +28,19 @@ final class MajpanelBundleTest extends TestCase
         $projectDir = sys_get_temp_dir().'/majpanel-frontend-'.bin2hex(random_bytes(6));
         $filesystem->mkdir($projectDir.'/assets');
         $filesystem->dumpFile($projectDir.'/assets/controllers.json', "{\n    \"controllers\": {},\n    \"entrypoints\": []\n}\n");
+        $filesystem->dumpFile($projectDir.'/webpack.config.js', <<<'JS'
+import Encore from '@symfony/webpack-encore';
+
+Encore
+    .setOutputPath('public/build/')
+    .setPublicPath('/build')
+    .addEntry('app', './assets/app.js')
+    .enableReactPreset()
+    .enableSourceMaps(true)
+;
+
+export default await Encore.getWebpackConfig();
+JS);
 
         try {
             $installer = new FrontendInstaller($filesystem, $projectDir);
@@ -37,6 +50,13 @@ final class MajpanelBundleTest extends TestCase
             self::assertFileExists($projectDir.'/webpack.config.js');
             self::assertFileExists($projectDir.'/assets/majpanel.ts');
             self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+
+            $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
+            self::assertStringContainsString(".addEntry('app', './assets/app.js')", $webpack);
+            self::assertStringContainsString(".addEntry('majpanel', './assets/majpanel.ts')", $webpack);
+            self::assertStringContainsString(".enableStimulusBridge('./assets/controllers.json')", $webpack);
+            self::assertStringContainsString('.enablePostCssLoader()', $webpack);
+            self::assertStringContainsString('.enableTypeScriptLoader()', $webpack);
 
             $controllers = json_decode((string) file_get_contents($projectDir.'/assets/controllers.json'), true, 512, JSON_THROW_ON_ERROR);
             self::assertTrue($controllers['controllers']['@symfony/ux-react']['react']['enabled']);
