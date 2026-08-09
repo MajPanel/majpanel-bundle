@@ -94,6 +94,9 @@ JS);
             self::assertStringContainsString("typeof value !== 'string' || value.trim() === ''", $grid);
             self::assertStringContainsString('value = null', $grid);
 
+            $relationAutocomplete = (string) file_get_contents($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
+            self::assertStringContainsString('style: { zIndex: 1500 }', $relationAutocomplete);
+
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
             self::assertStringContainsString(".addEntry('majpanel', './assets/majpanel.ts')", $webpack);

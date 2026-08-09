@@ -104,6 +104,11 @@ export default function RelationAutocomplete({
             value={multiple ? selectedOptions : (selectedOptions[0] ?? null)}
             loading={loading}
             inputValue={inputValue}
+            slotProps={{
+                popper: {
+                    style: { zIndex: 1500 },
+                },
+            }}
             filterOptions={(availableOptions) => availableOptions}
             getOptionLabel={(option) => option.label}
             isOptionEqualToValue={(option, selected) => option.value === selected.value}
