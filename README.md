@@ -173,6 +173,23 @@ shared `EntityCrudGrid` component. The grid uses API Platform's server-side
 pagination links; its search box filters the currently loaded page. Compile it
 after the first initialization:
 
+```js
+// webpack.config.js
+Encore
+    .setOutputPath('public/build/')
+    .setPublicPath('/build')
+    .addEntry('majpanel', './assets/majpanel.ts')
+    .enableReactPreset()
+    .enableStimulusBridge('./assets/controllers.json')
+    .enablePostCssLoader()
+    .enableTypeScriptLoader()
+;
+```
+
+`majpanel:init` adds the entry automatically to an existing Encore chain. The
+line can also be added manually as shown above if the host maintains a custom
+Webpack configuration.
+
 ```bash
 npm install
 npm run dev

@@ -98,9 +98,9 @@ final class FrontendInstaller
             ) ?? $updated;
         }
 
-        if (!str_contains($updated, ".addEntry('majpanel'")) {
+        if (preg_match('/^\s*\.addEntry\(\s*[\'\"]majpanel[\'\"]\s*,/m', $updated) !== 1) {
             $updated = preg_replace(
-                '/(\s+\.addEntry\([^\n]+\)\R)/',
+                '/(^\s*\.setPublicPath\([^\r\n]+\)\R)/m',
                 "$1    .addEntry('majpanel', './assets/majpanel.ts')\n",
                 $updated,
                 1,
@@ -109,7 +109,7 @@ final class FrontendInstaller
 
         if (!str_contains($updated, 'enableStimulusBridge(')) {
             $updated = preg_replace(
-                '/(\s+\.addEntry\(\'majpanel\'[^\n]+\)\R)/',
+                '/(\s+\.addEntry\(\s*[\'\"]majpanel[\'\"][^\r\n]+\)\R)/',
                 "$1    .enableStimulusBridge('./assets/controllers.json')\n",
                 $updated,
                 1,
