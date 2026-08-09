@@ -113,7 +113,7 @@ catch-all `main` firewall:
 security:
     firewalls:
         majpanel:
-            pattern: ^/(?:majpanel/admin|api/admin)(?:/|$)
+            pattern: ^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))
         main:
             # Keep the host application's existing firewall configuration.
 ```

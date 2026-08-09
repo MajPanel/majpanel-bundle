@@ -5,7 +5,7 @@ security:
             security: false
 
         majpanel:
-            pattern: ^/(?:majpanel/admin|api/admin)(?:/|$)
+            pattern: ^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))
             # MajpanelBundle adds the provider, MajpanelAuthenticator,
             # login entry point, and logout behavior to this firewall.
 

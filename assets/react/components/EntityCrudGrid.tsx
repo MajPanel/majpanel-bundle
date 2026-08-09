@@ -170,8 +170,8 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                     {!loading && filteredRows.map((row) => <tr className="border-b last:border-0" key={String(row[idField])}>
                         {visibleFields.map((field) => <td className="max-w-xs truncate px-4 py-3" key={field.name}>{displayValue(row[field.name])}</td>)}
                         {(canUpdate || canDelete) && <td className="whitespace-nowrap px-4 py-3">
-                            {canUpdate && <button className="mr-3 text-blue-700 hover:underline" onClick={() => openForm(row)}>Edit</button>}
-                            {canDelete && <button className="text-red-700 hover:underline" onClick={() => void remove(row)}>Delete</button>}
+                            {canUpdate && <button className="mr-2 cursor-pointer rounded border border-blue-200 bg-blue-50 px-3 py-1.5 font-medium text-blue-700 hover:border-blue-300 hover:bg-blue-100" onClick={() => openForm(row)}>Edit</button>}
+                            {canDelete && <button className="cursor-pointer rounded border border-red-200 bg-red-50 px-3 py-1.5 font-medium text-red-700 hover:border-red-300 hover:bg-red-100" onClick={() => void remove(row)}>Delete</button>}
                         </td>}
                     </tr>)}
                     {!loading && filteredRows.length === 0 && <tr><td className="px-4 py-6 text-center text-slate-500" colSpan={visibleFields.length + 1}>No records found.</td></tr>}

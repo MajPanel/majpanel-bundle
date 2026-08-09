@@ -117,6 +117,7 @@ JS);
         self::assertSame('majpanel_admin_entity', $route->name);
         self::assertSame('[a-z0-9]+(?:[-_][a-z0-9]+)*', $route->requirements['entity']);
         self::assertSame(['GET'], $route->methods);
+        self::assertSame(-100, $route->priority);
     }
 
     public function testSecurityExampleConfiguresTheMajpanelLoginFirewall(): void
@@ -126,7 +127,7 @@ JS);
         $majpanelFirewall = $firewalls['majpanel'];
 
         self::assertSame(false, $firewalls['dev']['security']);
-        self::assertSame('^/(?:majpanel/admin|api/admin)(?:/|$)', $majpanelFirewall['pattern']);
+        self::assertSame('^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))', $majpanelFirewall['pattern']);
         self::assertArrayNotHasKey('form_login', $majpanelFirewall);
         self::assertArrayHasKey('main', $firewalls);
     }
@@ -152,6 +153,10 @@ JS);
 
         self::assertSame('majpanel_admin_provider', $bundleFirewallConfig['provider']);
         self::assertSame([MajpanelAuthenticator::class], $bundleFirewallConfig['custom_authenticators']);
+        self::assertSame(
+            '^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))',
+            $bundleFirewallConfig['pattern'],
+        );
         self::assertSame(MajpanelAuthenticator::class, $bundleFirewallConfig['entry_point']);
         self::assertSame('majpanel_logout', $bundleFirewallConfig['logout']['path']);
         self::assertTrue($bundleFirewallConfig['logout']['enable_csrf']);

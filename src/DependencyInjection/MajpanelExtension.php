@@ -45,6 +45,7 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
                 $container->loadFromExtension('security', [
                     'firewalls' => [
                         self::FIREWALL_NAME => [
+                            'pattern' => '^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))',
                             'lazy' => true,
                             'provider' => 'majpanel_admin_provider',
                             'custom_authenticators' => [MajpanelAuthenticator::class],

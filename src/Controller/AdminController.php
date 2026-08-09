@@ -23,6 +23,7 @@ final class AdminController extends AbstractController
         name: 'majpanel_admin_entity',
         requirements: ['entity' => '[a-z0-9]+(?:[-_][a-z0-9]+)*'],
         methods: ['GET'],
+        priority: -100,
     )]
     public function entity(string $entity): Response
     {
