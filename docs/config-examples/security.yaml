@@ -9,10 +9,11 @@ security:
                 property: username
 
     firewalls:
-        dev:
+        dev: hh
             pattern: ^/(_profiler|_wdt|assets|build|bundles/majpanel)/
             security: false
-        main:
+        majpanel:
+            pattern: ^/(?:majpanel/admin|api/admin)(?:/|$)
             lazy: true
             provider: majpanel_admin_provider
             form_login:

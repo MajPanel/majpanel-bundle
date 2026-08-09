@@ -102,10 +102,26 @@ prefix.
 
 ## Security
 
-The bundle provides default security configuration for its `AdminUser`, login,
-and logout routes. A complete reference is available at
-`docs/config-examples/security.yaml`. Host applications can override the
-defaults in their own `config/packages/security.yaml`.
+The bundle registers the `AdminUser` password hasher and entity provider.
+Symfony requires every firewall to be declared in one configuration section,
+so add the dedicated `majpanel` firewall from
+`docs/config-examples/security.yaml` to the host application's existing
+`config/packages/security.yaml`, before its catch-all `main` firewall.
+
+Symfony does not allow `security.access_control` to be merged from multiple
+configuration files. Add the Majpanel rules to the host application's existing
+`access_control` section:
+
+```yaml
+security:
+    access_control:
+        - { path: '^/majpanel/admin/login$', roles: PUBLIC_ACCESS }
+        - { path: '^/majpanel/admin(?:/|$)', roles: ROLE_ADMIN }
+```
+
+When the host application has no `access_control` section, the bundle adds
+these two rules automatically. When one already exists, the bundle leaves it
+untouched to avoid Symfony's non-mergeable configuration error.
 
 The access-control rules are order-sensitive. Public login and API rules must
 remain above the broader `/api` and `/admin` administrator rules.

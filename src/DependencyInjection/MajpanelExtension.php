@@ -16,7 +16,7 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
     public function prepend(ContainerBuilder $container): void
     {
         if ($container->hasExtension('security')) {
-            $container->prependExtensionConfig('security', [
+            $securityConfig = [
                 'password_hashers' => [
                     AdminUser::class => 'auto',
                 ],
@@ -28,32 +28,24 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
                         ],
                     ],
                 ],
-                'firewalls' => [
-                    'dev' => [
-                        'pattern' => '^/(_profiler|_wdt|assets|build|bundles/majpanel)/',
-                        'security' => false,
-                    ],
-                    'main' => [
-                        'lazy' => true,
-                        'provider' => 'majpanel_admin_provider',
-                        'form_login' => [
-                            'login_path' => 'majpanel_login',
-                            'check_path' => 'majpanel_login',
-                            'enable_csrf' => true,
-                            'default_target_path' => 'majpanel_admin_dashboard',
-                        ],
-                        'logout' => [
-                            'path' => 'majpanel_logout',
-                            'target' => 'majpanel_login',
-                            'enable_csrf' => true,
-                        ],
-                    ],
-                ],
-                'access_control' => [
+            ];
+
+            $hostDefinesAccessControl = false;
+            foreach ($container->getExtensionConfig('security') as $config) {
+                if (array_key_exists('access_control', $config)) {
+                    $hostDefinesAccessControl = true;
+                    break;
+                }
+            }
+
+            if (!$hostDefinesAccessControl) {
+                $securityConfig['access_control'] = [
                     ['path' => '^/majpanel/admin/login$', 'roles' => 'PUBLIC_ACCESS'],
                     ['path' => '^/majpanel/admin(?:/|$)', 'roles' => 'ROLE_ADMIN'],
-                ],
-            ]);
+                ];
+            }
+
+            $container->prependExtensionConfig('security', $securityConfig);
         }
 
         if ($container->hasExtension('api_platform')) {
