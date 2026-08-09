@@ -1,5 +1,41 @@
 (self["webpackChunk_majpanel_majpanel_bundle"] = self["webpackChunk_majpanel_majpanel_bundle"] || []).push([["majpanel"],{
 
+/***/ "./assets/controllers sync recursive \\.(j%7Ct)sx%3F$"
+/*!**************************************************!*\
+  !*** ./assets/controllers/ sync \.(j%7Ct)sx%3F$ ***!
+  \**************************************************/
+(module) {
+
+function webpackEmptyContext(req) {
+	const e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = () => ([]);
+webpackEmptyContext.resolve = webpackEmptyContext;
+webpackEmptyContext.id = "./assets/controllers sync recursive \\.(j%7Ct)sx%3F$";
+module.exports = webpackEmptyContext;
+
+/***/ },
+
+/***/ "./assets/react/controllers sync recursive \\.tsx%3F$"
+/*!**************************************************!*\
+  !*** ./assets/react/controllers/ sync \.tsx%3F$ ***!
+  \**************************************************/
+(module) {
+
+function webpackEmptyContext(req) {
+	const e = new Error("Cannot find module '" + req + "'");
+	e.code = 'MODULE_NOT_FOUND';
+	throw e;
+}
+webpackEmptyContext.keys = () => ([]);
+webpackEmptyContext.resolve = webpackEmptyContext;
+webpackEmptyContext.id = "./assets/react/controllers sync recursive \\.tsx%3F$";
+module.exports = webpackEmptyContext;
+
+/***/ },
+
 /***/ "./node_modules/@symfony/stimulus-bridge/dist/webpack/loader.js!./assets/controllers.json"
 /*!************************************************************************************************!*\
   !*** ./node_modules/@symfony/stimulus-bridge/dist/webpack/loader.js!./assets/controllers.json ***!
@@ -18,7 +54,8 @@ throw new Error("Module build failed (from ./node_modules/@symfony/stimulus-brid
 
 "use strict";
 __webpack_require__.r(__webpack_exports__);
-/* harmony import */ var _majpanel_stimulus_bootstrap_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./majpanel_stimulus_bootstrap.js */ "./assets/majpanel_stimulus_bootstrap.js");
+/* harmony import */ var _majpanel_stimulus_bootstrap_cjs__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./majpanel_stimulus_bootstrap.cjs */ "./assets/majpanel_stimulus_bootstrap.cjs");
+/* harmony import */ var _majpanel_stimulus_bootstrap_cjs__WEBPACK_IMPORTED_MODULE_0___default = /*#__PURE__*/__webpack_require__.n(_majpanel_stimulus_bootstrap_cjs__WEBPACK_IMPORTED_MODULE_0__);
 /* harmony import */ var _styles_majpanel_css__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ./styles/majpanel.css */ "./assets/styles/majpanel.css");
 
 
@@ -38,23 +75,24 @@ __webpack_require__.r(__webpack_exports__);
 
 /***/ },
 
-/***/ "./assets/majpanel_stimulus_bootstrap.js"
-/*!***********************************************!*\
-  !*** ./assets/majpanel_stimulus_bootstrap.js ***!
-  \***********************************************/
-(__unused_webpack___webpack_module__, __webpack_exports__, __webpack_require__) {
+/***/ "./assets/majpanel_stimulus_bootstrap.cjs"
+/*!************************************************!*\
+  !*** ./assets/majpanel_stimulus_bootstrap.cjs ***!
+  \************************************************/
+(module, __unused_webpack_exports, __webpack_require__) {
 
-"use strict";
-__webpack_require__.r(__webpack_exports__);
-/* harmony export */ __webpack_require__.d(__webpack_exports__, {
-/* harmony export */   app: () => (/* binding */ app)
-/* harmony export */ });
-/* harmony import */ var _symfony_stimulus_bridge__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @symfony/stimulus-bridge */ "./node_modules/@symfony/stimulus-bridge/dist/index.js");
-/* harmony import */ var _symfony_ux_react__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @symfony/ux-react */ "./vendor/symfony/ux-react/assets/dist/register_controller.js");
+const { startStimulusApp } = __webpack_require__(/*! @symfony/stimulus-bridge */ "./node_modules/@symfony/stimulus-bridge/dist/index.js");
+const { registerReactControllerComponents } = __webpack_require__(/*! @symfony/ux-react */ "./vendor/symfony/ux-react/assets/dist/register_controller.js");
 
+const app = startStimulusApp(
+    __webpack_require__("./assets/controllers sync recursive \\.(j%7Ct)sx%3F$"),
+);
 
-const app = (0,_symfony_stimulus_bridge__WEBPACK_IMPORTED_MODULE_0__.startStimulusApp)(require.context('./controllers', true, /\.(j|t)sx?$/));
-(0,_symfony_ux_react__WEBPACK_IMPORTED_MODULE_1__.registerReactControllerComponents)(require.context('./react/controllers', true, /\.tsx?$/));
+registerReactControllerComponents(
+    __webpack_require__("./assets/react/controllers sync recursive \\.tsx%3F$"),
+);
+
+module.exports = { app };
 
 
 /***/ },
@@ -108,4 +146,4 @@ function registerReactControllerComponents(context) {
 /******/ var __webpack_exports__ = __webpack_require__.O();
 /******/ }
 ]);
-//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFqcGFuZWwuanMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7OztBQUEwQzs7Ozs7Ozs7Ozs7OztBQ0ExQzs7Ozs7Ozs7Ozs7Ozs7Ozs7O0FDQTREO0FBQ1U7QUFFdEUsTUFBTSxHQUFHLEdBQUcsMEVBQWdCLENBQ3hCLE9BQU8sQ0FBQyxPQUFPLENBQUMsZUFBZSxFQUFFLElBQUksRUFBRSxhQUFhLENBQ3hELENBQUM7QUFFRCxvRkFBaUMsQ0FDN0IsT0FBTyxDQUFDLE9BQU8sQ0FBQyxxQkFBcUIsRUFBRSxJQUFJLEVBQUUsU0FBUyxDQUMxRCxDQUFDOzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUNURCxTQUFTLGlDQUFpQyxDQUFDLE9BQU8sRUFBRTtFQUNuRCxNQUFNLGdCQUFnQixHQUFHLENBQUMsQ0FBQztFQUMzQixNQUFNLHdCQUF3QixHQUFJLENBQUMsSUFBSztJQUN2QyxDQUFDLENBQUMsSUFBSSxDQUFDLENBQUMsQ0FBQyxPQUFPLENBQUUsR0FBRyxJQUFLO01BQ3pCLGdCQUFnQixDQUFDLEdBQUcsQ0FBQyxHQUFHLENBQUMsQ0FBQyxHQUFHLENBQUMsQ0FBQyxPQUFPO0lBQ3ZDLENBQUMsQ0FBQztFQUNILENBQUM7RUFDRCx3QkFBd0IsQ0FBQyxPQUFPLENBQUM7RUFDakMsTUFBTSxDQUFDLHFCQUFxQixHQUFJLElBQUksSUFBSztJQUN4QyxNQUFNLFNBQVMsR0FBRyxnQkFBZ0IsQ0FBQyxLQUFLLElBQUksTUFBTSxDQUFDLElBQUksZ0JBQWdCLENBQUMsS0FBSyxJQUFJLE1BQU0sQ0FBQztJQUN4RixJQUFJLE9BQU8sU0FBUyxLQUFLLFdBQVcsRUFBRTtNQUNyQyxNQUFNLGNBQWMsR0FBRyxNQUFNLENBQUMsSUFBSSxDQUFDLGdCQUFnQixDQUFDLENBQUMsR0FBRyxDQUFFLEdBQUcsSUFBSyxHQUFHLENBQUMsT0FBTyxDQUFDLElBQUksRUFBRSxFQUFFLENBQUMsQ0FBQyxPQUFPLENBQUMsTUFBTSxFQUFFLEVBQUUsQ0FBQyxDQUFDLE9BQU8sQ0FBQyxNQUFNLEVBQUUsRUFBRSxDQUFDLENBQUM7TUFDaEksSUFBSSxjQUFjLENBQUMsUUFBUSxDQUFDLElBQUksQ0FBQyxFQUFFLE1BQU0sSUFBSSxLQUFLLENBQUM7QUFDdEQsd0NBQXdDLElBQUksd0ZBQXdGLENBQUM7TUFDbEksTUFBTSxJQUFJLEtBQUssQ0FBQyxxQkFBcUIsSUFBSSxzQ0FBc0MsY0FBYyxDQUFDLElBQUksQ0FBQyxJQUFJLENBQUMsRUFBRSxDQUFDO0lBQzVHO0lBQ0EsT0FBTyxTQUFTO0VBQ2pCLENBQUM7QUFDRiIsInNvdXJjZXMiOlsid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvYXBwLnRzIiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvc3R5bGVzL21hanBhbmVsLmNzcz80MzU4Iiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvbWFqcGFuZWxfc3RpbXVsdXNfYm9vdHN0cmFwLmpzIiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi92ZW5kb3Ivc3ltZm9ueS91eC1yZWFjdC9hc3NldHMvZGlzdC9yZWdpc3Rlcl9jb250cm9sbGVyLmpzIl0sInNvdXJjZXNDb250ZW50IjpbImltcG9ydCAnLi9tYWpwYW5lbF9zdGltdWx1c19ib290c3RyYXAuanMnO1xuaW1wb3J0ICcuL3N0eWxlcy9tYWpwYW5lbC5jc3MnO1xuIiwiLy8gZXh0cmFjdGVkIGJ5IG1pbmktY3NzLWV4dHJhY3QtcGx1Z2luXG5leHBvcnQge307IiwiaW1wb3J0IHsgc3RhcnRTdGltdWx1c0FwcCB9IGZyb20gJ0BzeW1mb255L3N0aW11bHVzLWJyaWRnZSc7XG5pbXBvcnQgeyByZWdpc3RlclJlYWN0Q29udHJvbGxlckNvbXBvbmVudHMgfSBmcm9tICdAc3ltZm9ueS91eC1yZWFjdCc7XG5cbmNvbnN0IGFwcCA9IHN0YXJ0U3RpbXVsdXNBcHAoXG4gICAgcmVxdWlyZS5jb250ZXh0KCcuL2NvbnRyb2xsZXJzJywgdHJ1ZSwgL1xcLihqfHQpc3g/JC8pLFxuKTtcblxucmVnaXN0ZXJSZWFjdENvbnRyb2xsZXJDb21wb25lbnRzKFxuICAgIHJlcXVpcmUuY29udGV4dCgnLi9yZWFjdC9jb250cm9sbGVycycsIHRydWUsIC9cXC50c3g/JC8pLFxuKTtcblxuZXhwb3J0IHsgYXBwIH07XG4iLCJmdW5jdGlvbiByZWdpc3RlclJlYWN0Q29udHJvbGxlckNvbXBvbmVudHMoY29udGV4dCkge1xuXHRjb25zdCByZWFjdENvbnRyb2xsZXJzID0ge307XG5cdGNvbnN0IGltcG9ydEFsbFJlYWN0Q29tcG9uZW50cyA9IChyKSA9PiB7XG5cdFx0ci5rZXlzKCkuZm9yRWFjaCgoa2V5KSA9PiB7XG5cdFx0XHRyZWFjdENvbnRyb2xsZXJzW2tleV0gPSByKGtleSkuZGVmYXVsdDtcblx0XHR9KTtcblx0fTtcblx0aW1wb3J0QWxsUmVhY3RDb21wb25lbnRzKGNvbnRleHQpO1xuXHR3aW5kb3cucmVzb2x2ZVJlYWN0Q29tcG9uZW50ID0gKG5hbWUpID0+IHtcblx0XHRjb25zdCBjb21wb25lbnQgPSByZWFjdENvbnRyb2xsZXJzW2AuLyR7bmFtZX0uanN4YF0gfHwgcmVhY3RDb250cm9sbGVyc1tgLi8ke25hbWV9LnRzeGBdO1xuXHRcdGlmICh0eXBlb2YgY29tcG9uZW50ID09PSBcInVuZGVmaW5lZFwiKSB7XG5cdFx0XHRjb25zdCBwb3NzaWJsZVZhbHVlcyA9IE9iamVjdC5rZXlzKHJlYWN0Q29udHJvbGxlcnMpLm1hcCgoa2V5KSA9PiBrZXkucmVwbGFjZShcIi4vXCIsIFwiXCIpLnJlcGxhY2UoXCIuanN4XCIsIFwiXCIpLnJlcGxhY2UoXCIudHN4XCIsIFwiXCIpKTtcblx0XHRcdGlmIChwb3NzaWJsZVZhbHVlcy5pbmNsdWRlcyhuYW1lKSkgdGhyb3cgbmV3IEVycm9yKGBcbiAgICAgICAgICAgICAgICAgICAgUmVhY3QgY29udHJvbGxlciBcIiR7bmFtZX1cIiBjb3VsZCBub3QgYmUgcmVzb2x2ZWQuIEVuc3VyZSB0aGUgbW9kdWxlIGV4cG9ydHMgdGhlIGNvbnRyb2xsZXIgYXMgYSBkZWZhdWx0IGV4cG9ydC5gKTtcblx0XHRcdHRocm93IG5ldyBFcnJvcihgUmVhY3QgY29udHJvbGxlciBcIiR7bmFtZX1cIiBkb2VzIG5vdCBleGlzdC4gUG9zc2libGUgdmFsdWVzOiAke3Bvc3NpYmxlVmFsdWVzLmpvaW4oXCIsIFwiKX1gKTtcblx0XHR9XG5cdFx0cmV0dXJuIGNvbXBvbmVudDtcblx0fTtcbn1cbmV4cG9ydCB7IHJlZ2lzdGVyUmVhY3RDb250cm9sbGVyQ29tcG9uZW50cyB9O1xuIl0sIm5hbWVzIjpbXSwic291cmNlUm9vdCI6IiJ9
+//# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJmaWxlIjoibWFqcGFuZWwuanMiLCJtYXBwaW5ncyI6Ijs7Ozs7Ozs7QUFBQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EscUM7Ozs7Ozs7Ozs7QUNSQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0E7QUFDQTtBQUNBO0FBQ0EscUM7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUNSMkM7Ozs7Ozs7Ozs7Ozs7QUNBM0M7Ozs7Ozs7Ozs7O0FDQUEsUUFBUSxtQkFBbUIsRUFBRSxtQkFBTyxDQUFDLHVGQUEwQjtBQUMvRCxRQUFRLG9DQUFvQyxFQUFFLG1CQUFPLENBQUMsdUZBQW1COztBQUV6RTtBQUNBLElBQUksMkVBQXFEO0FBQ3pEOztBQUVBO0FBQ0EsSUFBSSwyRUFBdUQ7QUFDM0Q7O0FBRUEsbUJBQW1COzs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7Ozs7QUNYbkIsU0FBUyxpQ0FBaUMsQ0FBQyxPQUFPLEVBQUU7RUFDbkQsTUFBTSxnQkFBZ0IsR0FBRyxDQUFDLENBQUM7RUFDM0IsTUFBTSx3QkFBd0IsR0FBSSxDQUFDLElBQUs7SUFDdkMsQ0FBQyxDQUFDLElBQUksQ0FBQyxDQUFDLENBQUMsT0FBTyxDQUFFLEdBQUcsSUFBSztNQUN6QixnQkFBZ0IsQ0FBQyxHQUFHLENBQUMsR0FBRyxDQUFDLENBQUMsR0FBRyxDQUFDLENBQUMsT0FBTztJQUN2QyxDQUFDLENBQUM7RUFDSCxDQUFDO0VBQ0Qsd0JBQXdCLENBQUMsT0FBTyxDQUFDO0VBQ2pDLE1BQU0sQ0FBQyxxQkFBcUIsR0FBSSxJQUFJLElBQUs7SUFDeEMsTUFBTSxTQUFTLEdBQUcsZ0JBQWdCLENBQUMsS0FBSyxJQUFJLE1BQU0sQ0FBQyxJQUFJLGdCQUFnQixDQUFDLEtBQUssSUFBSSxNQUFNLENBQUM7SUFDeEYsSUFBSSxPQUFPLFNBQVMsS0FBSyxXQUFXLEVBQUU7TUFDckMsTUFBTSxjQUFjLEdBQUcsTUFBTSxDQUFDLElBQUksQ0FBQyxnQkFBZ0IsQ0FBQyxDQUFDLEdBQUcsQ0FBRSxHQUFHLElBQUssR0FBRyxDQUFDLE9BQU8sQ0FBQyxJQUFJLEVBQUUsRUFBRSxDQUFDLENBQUMsT0FBTyxDQUFDLE1BQU0sRUFBRSxFQUFFLENBQUMsQ0FBQyxPQUFPLENBQUMsTUFBTSxFQUFFLEVBQUUsQ0FBQyxDQUFDO01BQ2hJLElBQUksY0FBYyxDQUFDLFFBQVEsQ0FBQyxJQUFJLENBQUMsRUFBRSxNQUFNLElBQUksS0FBSyxDQUFDO0FBQ3RELHdDQUF3QyxJQUFJLHdGQUF3RixDQUFDO01BQ2xJLE1BQU0sSUFBSSxLQUFLLENBQUMscUJBQXFCLElBQUksc0NBQXNDLGNBQWMsQ0FBQyxJQUFJLENBQUMsSUFBSSxDQUFDLEVBQUUsQ0FBQztJQUM1RztJQUNBLE9BQU8sU0FBUztFQUNqQixDQUFDO0FBQ0YiLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly9AbWFqcGFuZWwvbWFqcGFuZWwtYnVuZGxlLy4vYXNzZXRzL2NvbnRyb2xsZXJzLyBzeW5jIFxcLihqJTdDdClzeCUzRiQiLCJ3ZWJwYWNrOi8vQG1hanBhbmVsL21hanBhbmVsLWJ1bmRsZS8uL2Fzc2V0cy9yZWFjdC9jb250cm9sbGVycy8gc3luYyBcXC50c3glM0YkIiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvYXBwLnRzIiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvc3R5bGVzL21hanBhbmVsLmNzcz80MzU4Iiwid2VicGFjazovL0BtYWpwYW5lbC9tYWpwYW5lbC1idW5kbGUvLi9hc3NldHMvbWFqcGFuZWxfc3RpbXVsdXNfYm9vdHN0cmFwLmNqcyIsIndlYnBhY2s6Ly9AbWFqcGFuZWwvbWFqcGFuZWwtYnVuZGxlLy4vdmVuZG9yL3N5bWZvbnkvdXgtcmVhY3QvYXNzZXRzL2Rpc3QvcmVnaXN0ZXJfY29udHJvbGxlci5qcyJdLCJzb3VyY2VzQ29udGVudCI6WyJmdW5jdGlvbiB3ZWJwYWNrRW1wdHlDb250ZXh0KHJlcSkge1xuXHRjb25zdCBlID0gbmV3IEVycm9yKFwiQ2Fubm90IGZpbmQgbW9kdWxlICdcIiArIHJlcSArIFwiJ1wiKTtcblx0ZS5jb2RlID0gJ01PRFVMRV9OT1RfRk9VTkQnO1xuXHR0aHJvdyBlO1xufVxud2VicGFja0VtcHR5Q29udGV4dC5rZXlzID0gKCkgPT4gKFtdKTtcbndlYnBhY2tFbXB0eUNvbnRleHQucmVzb2x2ZSA9IHdlYnBhY2tFbXB0eUNvbnRleHQ7XG53ZWJwYWNrRW1wdHlDb250ZXh0LmlkID0gXCIuL2Fzc2V0cy9jb250cm9sbGVycyBzeW5jIHJlY3Vyc2l2ZSBcXFxcLihqJTdDdClzeCUzRiRcIjtcbm1vZHVsZS5leHBvcnRzID0gd2VicGFja0VtcHR5Q29udGV4dDsiLCJmdW5jdGlvbiB3ZWJwYWNrRW1wdHlDb250ZXh0KHJlcSkge1xuXHRjb25zdCBlID0gbmV3IEVycm9yKFwiQ2Fubm90IGZpbmQgbW9kdWxlICdcIiArIHJlcSArIFwiJ1wiKTtcblx0ZS5jb2RlID0gJ01PRFVMRV9OT1RfRk9VTkQnO1xuXHR0aHJvdyBlO1xufVxud2VicGFja0VtcHR5Q29udGV4dC5rZXlzID0gKCkgPT4gKFtdKTtcbndlYnBhY2tFbXB0eUNvbnRleHQucmVzb2x2ZSA9IHdlYnBhY2tFbXB0eUNvbnRleHQ7XG53ZWJwYWNrRW1wdHlDb250ZXh0LmlkID0gXCIuL2Fzc2V0cy9yZWFjdC9jb250cm9sbGVycyBzeW5jIHJlY3Vyc2l2ZSBcXFxcLnRzeCUzRiRcIjtcbm1vZHVsZS5leHBvcnRzID0gd2VicGFja0VtcHR5Q29udGV4dDsiLCJpbXBvcnQgJy4vbWFqcGFuZWxfc3RpbXVsdXNfYm9vdHN0cmFwLmNqcyc7XG5pbXBvcnQgJy4vc3R5bGVzL21hanBhbmVsLmNzcyc7XG4iLCIvLyBleHRyYWN0ZWQgYnkgbWluaS1jc3MtZXh0cmFjdC1wbHVnaW5cbmV4cG9ydCB7fTsiLCJjb25zdCB7IHN0YXJ0U3RpbXVsdXNBcHAgfSA9IHJlcXVpcmUoJ0BzeW1mb255L3N0aW11bHVzLWJyaWRnZScpO1xuY29uc3QgeyByZWdpc3RlclJlYWN0Q29udHJvbGxlckNvbXBvbmVudHMgfSA9IHJlcXVpcmUoJ0BzeW1mb255L3V4LXJlYWN0Jyk7XG5cbmNvbnN0IGFwcCA9IHN0YXJ0U3RpbXVsdXNBcHAoXG4gICAgcmVxdWlyZS5jb250ZXh0KCcuL2NvbnRyb2xsZXJzJywgdHJ1ZSwgL1xcLihqfHQpc3g/JC8pLFxuKTtcblxucmVnaXN0ZXJSZWFjdENvbnRyb2xsZXJDb21wb25lbnRzKFxuICAgIHJlcXVpcmUuY29udGV4dCgnLi9yZWFjdC9jb250cm9sbGVycycsIHRydWUsIC9cXC50c3g/JC8pLFxuKTtcblxubW9kdWxlLmV4cG9ydHMgPSB7IGFwcCB9O1xuIiwiZnVuY3Rpb24gcmVnaXN0ZXJSZWFjdENvbnRyb2xsZXJDb21wb25lbnRzKGNvbnRleHQpIHtcblx0Y29uc3QgcmVhY3RDb250cm9sbGVycyA9IHt9O1xuXHRjb25zdCBpbXBvcnRBbGxSZWFjdENvbXBvbmVudHMgPSAocikgPT4ge1xuXHRcdHIua2V5cygpLmZvckVhY2goKGtleSkgPT4ge1xuXHRcdFx0cmVhY3RDb250cm9sbGVyc1trZXldID0gcihrZXkpLmRlZmF1bHQ7XG5cdFx0fSk7XG5cdH07XG5cdGltcG9ydEFsbFJlYWN0Q29tcG9uZW50cyhjb250ZXh0KTtcblx0d2luZG93LnJlc29sdmVSZWFjdENvbXBvbmVudCA9IChuYW1lKSA9PiB7XG5cdFx0Y29uc3QgY29tcG9uZW50ID0gcmVhY3RDb250cm9sbGVyc1tgLi8ke25hbWV9LmpzeGBdIHx8IHJlYWN0Q29udHJvbGxlcnNbYC4vJHtuYW1lfS50c3hgXTtcblx0XHRpZiAodHlwZW9mIGNvbXBvbmVudCA9PT0gXCJ1bmRlZmluZWRcIikge1xuXHRcdFx0Y29uc3QgcG9zc2libGVWYWx1ZXMgPSBPYmplY3Qua2V5cyhyZWFjdENvbnRyb2xsZXJzKS5tYXAoKGtleSkgPT4ga2V5LnJlcGxhY2UoXCIuL1wiLCBcIlwiKS5yZXBsYWNlKFwiLmpzeFwiLCBcIlwiKS5yZXBsYWNlKFwiLnRzeFwiLCBcIlwiKSk7XG5cdFx0XHRpZiAocG9zc2libGVWYWx1ZXMuaW5jbHVkZXMobmFtZSkpIHRocm93IG5ldyBFcnJvcihgXG4gICAgICAgICAgICAgICAgICAgIFJlYWN0IGNvbnRyb2xsZXIgXCIke25hbWV9XCIgY291bGQgbm90IGJlIHJlc29sdmVkLiBFbnN1cmUgdGhlIG1vZHVsZSBleHBvcnRzIHRoZSBjb250cm9sbGVyIGFzIGEgZGVmYXVsdCBleHBvcnQuYCk7XG5cdFx0XHR0aHJvdyBuZXcgRXJyb3IoYFJlYWN0IGNvbnRyb2xsZXIgXCIke25hbWV9XCIgZG9lcyBub3QgZXhpc3QuIFBvc3NpYmxlIHZhbHVlczogJHtwb3NzaWJsZVZhbHVlcy5qb2luKFwiLCBcIil9YCk7XG5cdFx0fVxuXHRcdHJldHVybiBjb21wb25lbnQ7XG5cdH07XG59XG5leHBvcnQgeyByZWdpc3RlclJlYWN0Q29udHJvbGxlckNvbXBvbmVudHMgfTtcbiJdLCJuYW1lcyI6W10sInNvdXJjZVJvb3QiOiIifQ==

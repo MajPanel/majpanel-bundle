@@ -169,7 +169,9 @@ php bin/console majpanel:init
 
 The initializer also installs the Majpanel React/Encore scaffold when it is
 missing, including `package.json`, the `majpanel` entry, Tailwind CSS, and the
-shared `EntityCrudGrid` component. Compile it after the first initialization:
+shared `EntityCrudGrid` component. The grid uses API Platform's server-side
+pagination links; its search box filters the currently loaded page. Compile it
+after the first initialization:
 
 ```bash
 npm install

@@ -85,6 +85,11 @@ JS);
             self::assertStringContainsString('@source "../../templates";', $styles);
             self::assertStringContainsString('@source "../../vendor/majpanel/majpanel-bundle/templates";', $styles);
 
+            $grid = (string) file_get_contents($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+            self::assertStringContainsString("url.searchParams.set('page', String(page))", $grid);
+            self::assertStringContainsString("object.totalItems ?? object['hydra:totalItems']", $grid);
+            self::assertStringContainsString('hasNextPage', $grid);
+
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
             self::assertStringContainsString(".addEntry('majpanel', './assets/majpanel.ts')", $webpack);

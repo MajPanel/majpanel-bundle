@@ -26,6 +26,12 @@ export type EntityAdminConfig = {
 };
 
 type EntityRecord = Record<string, unknown>;
+type CollectionResult = {
+    rows: EntityRecord[];
+    totalItems: number;
+    hasPreviousPage: boolean;
+    hasNextPage: boolean;
+};
 type Props = {
     title: string;
     apiUrl: string;
@@ -38,14 +44,34 @@ type Props = {
 
 const jsonHeaders = { Accept: 'application/ld+json', 'Content-Type': 'application/ld+json' };
 
-function collection(data: unknown): EntityRecord[] {
-    if (Array.isArray(data)) return data as EntityRecord[];
+function collection(data: unknown): CollectionResult {
+    if (Array.isArray(data)) {
+        return { rows: data as EntityRecord[], totalItems: data.length, hasPreviousPage: false, hasNextPage: false };
+    }
     if (data && typeof data === 'object') {
         const object = data as Record<string, unknown>;
         const members = object.member ?? object['hydra:member'];
-        if (Array.isArray(members)) return members as EntityRecord[];
+        const rows = Array.isArray(members) ? members as EntityRecord[] : [];
+        const rawTotalItems = object.totalItems ?? object['hydra:totalItems'];
+        const totalItems = typeof rawTotalItems === 'number' ? rawTotalItems : Number(rawTotalItems ?? rows.length);
+        const rawView = object.view ?? object['hydra:view'];
+        const view = rawView && typeof rawView === 'object' ? rawView as Record<string, unknown> : {};
+
+        return {
+            rows,
+            totalItems: Number.isFinite(totalItems) ? totalItems : rows.length,
+            hasPreviousPage: Boolean(view.previous ?? view['hydra:previous']),
+            hasNextPage: Boolean(view.next ?? view['hydra:next']),
+        };
     }
-    return [];
+    return { rows: [], totalItems: 0, hasPreviousPage: false, hasNextPage: false };
+}
+
+function paginatedUrl(apiUrl: string, page: number): string {
+    const url = new URL(apiUrl, window.location.origin);
+    url.searchParams.set('page', String(page));
+
+    return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : url.toString();
 }
 
 function displayValue(value: unknown): string {
@@ -87,6 +113,10 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
+    const [page, setPage] = useState(1);
+    const [totalItems, setTotalItems] = useState(0);
+    const [hasPreviousPage, setHasPreviousPage] = useState(false);
+    const [hasNextPage, setHasNextPage] = useState(false);
     const [editing, setEditing] = useState<EntityRecord | null | undefined>(undefined);
     const [values, setValues] = useState<EntityRecord>({});
 
@@ -94,9 +124,13 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         setLoading(true);
         setError('');
         try {
-            const response = await fetch(apiUrl, { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
+            const response = await fetch(paginatedUrl(apiUrl, page), { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
             if (!response.ok) throw new Error(`Request failed (${response.status})`);
-            setRows(collection(await response.json()));
+            const result = collection(await response.json());
+            setRows(result.rows);
+            setTotalItems(result.totalItems);
+            setHasPreviousPage(result.hasPreviousPage);
+            setHasNextPage(result.hasNextPage);
         } catch (reason) {
             setError(reason instanceof Error ? reason.message : 'Unable to load records.');
         } finally {
@@ -104,7 +138,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         }
     };
 
-    useEffect(() => { void load(); }, [apiUrl]);
+    useEffect(() => { void load(); }, [apiUrl, page]);
 
     const visibleFields = fields.filter((field) => field.showInGrid !== false);
     const filteredRows = useMemo(() => {
@@ -151,7 +185,8 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         const response = await fetch(`${apiUrl}/${encodeURIComponent(String(row[idField]))}`, {
             method: 'DELETE', credentials: 'same-origin', headers: { Accept: 'application/ld+json' },
         });
-        if (response.ok) await load();
+        if (response.ok && rows.length === 1 && page > 1) setPage((currentPage) => currentPage - 1);
+        else if (response.ok) await load();
         else setError(`Delete failed (${response.status})`);
     };
 
@@ -160,7 +195,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
             <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
             {canCreate && <button className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700" onClick={() => openForm(null)}>Create</button>}
         </div>
-        <input className="w-full max-w-md rounded border border-slate-300 px-3 py-2" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search…" />
+        <input className="w-full max-w-md rounded border border-slate-300 px-3 py-2" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search this page…" />
         {error && <div className="rounded border border-red-300 bg-red-50 p-3 text-red-700">{error}</div>}
         <div className="overflow-x-auto rounded border border-slate-200 bg-white">
             <table className="w-full border-collapse text-left text-sm">
@@ -178,6 +213,13 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                 </tbody>
             </table>
         </div>
+        <nav className="flex flex-wrap items-center justify-between gap-3" aria-label={`${title} pagination`}>
+            <span className="text-sm text-slate-600">{totalItems} {totalItems === 1 ? 'record' : 'records'} · Page {page}</span>
+            <div className="flex gap-2">
+                <button className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50" type="button" disabled={loading || !hasPreviousPage} onClick={() => setPage((currentPage) => Math.max(1, currentPage - 1))}>Previous</button>
+                <button className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50" type="button" disabled={loading || !hasNextPage} onClick={() => setPage((currentPage) => currentPage + 1)}>Next</button>
+            </div>
+        </nav>
         {editing !== undefined && <div className="majpanel-modal-backdrop" role="presentation" onMouseDown={() => setEditing(undefined)}>
             <form className="majpanel-modal space-y-4" onSubmit={(event) => void submit(event)} onMouseDown={(event) => event.stopPropagation()}>
                 <h2 className="text-xl font-semibold">{editing ? `Edit ${title}` : `Create ${title}`}</h2>
