@@ -28,6 +28,7 @@ final class MajpanelBundleTest extends TestCase
         $projectDir = sys_get_temp_dir().'/majpanel-frontend-'.bin2hex(random_bytes(6));
         $filesystem->mkdir($projectDir.'/assets');
         $filesystem->dumpFile($projectDir.'/assets/controllers.json', "{\n    \"controllers\": {},\n    \"entrypoints\": []\n}\n");
+        $filesystem->dumpFile($projectDir.'/assets/app.js', "import { startStimulusApp } from '@symfony/stimulus-bundle';\n");
         $filesystem->dumpFile($projectDir.'/webpack.config.js', <<<'JS'
 import Encore from '@symfony/webpack-encore';
 
@@ -52,7 +53,7 @@ JS);
             self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
-            self::assertStringContainsString(".addEntry('app', './assets/app.js')", $webpack);
+            self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
             self::assertStringContainsString(".addEntry('majpanel', './assets/majpanel.ts')", $webpack);
             self::assertStringContainsString(".enableStimulusBridge('./assets/controllers.json')", $webpack);
             self::assertStringContainsString('.enablePostCssLoader()', $webpack);

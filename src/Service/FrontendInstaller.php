@@ -70,6 +70,18 @@ final class FrontendInstaller
         $contents = (string) file_get_contents($target);
         $updated = $contents;
 
+        $assetMapperApp = $this->projectDir.'/assets/app.js';
+        if (is_file($assetMapperApp)
+            && str_contains((string) file_get_contents($assetMapperApp), "from '@symfony/stimulus-bundle'")
+        ) {
+            $updated = preg_replace(
+                '/\s+\.addEntry\([\'\"]app[\'\"][^\n]+\)\R/',
+                "\n",
+                $updated,
+                1,
+            ) ?? $updated;
+        }
+
         if (!str_contains($updated, ".addEntry('majpanel'")) {
             $updated = preg_replace(
                 '/(\s+\.addEntry\([^\n]+\)\R)/',
