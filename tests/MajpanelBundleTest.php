@@ -15,6 +15,7 @@ use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
+use Symfony\Bundle\FrameworkBundle\DependencyInjection\FrameworkExtension;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\Filesystem\Filesystem;
@@ -24,6 +25,19 @@ use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
 {
+    public function testBundleExcludesWebpackSourcesFromAssetMapper(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new FrameworkExtension());
+
+        (new MajpanelExtension())->prepend($container);
+
+        $patterns = $container->getExtensionConfig('framework')[0]['asset_mapper']['excluded_patterns'];
+        self::assertContains('*/assets/majpanel*', $patterns);
+        self::assertContains('*/assets/styles/majpanel.css', $patterns);
+        self::assertContains('*/assets/react/**/*.tsx', $patterns);
+    }
+
     public function testDemoBlogIsAStatefulProtectedApiResource(): void
     {
         $resource = (new \ReflectionClass(Blog::class))->getAttributes(ApiResource::class)[0]->newInstance();
@@ -125,11 +139,34 @@ JS);
         $configuration = Yaml::parseFile(\dirname(__DIR__).'/docs/config-examples/security.yaml');
         $firewalls = $configuration['security']['firewalls'];
         $majpanelFirewall = $firewalls['majpanel'];
+        $accessControl = $configuration['security']['access_control'];
 
         self::assertSame(false, $firewalls['dev']['security']);
         self::assertSame('^/(?:majpanel/admin(?:/|$)|api/admin(?:/|$)|api/docs(?:[./]|$))', $majpanelFirewall['pattern']);
         self::assertArrayNotHasKey('form_login', $majpanelFirewall);
         self::assertArrayHasKey('main', $firewalls);
+        self::assertContains(
+            ['path' => '^/api/docs(?:[./]|$)', 'roles' => 'ROLE_ADMIN'],
+            $accessControl,
+        );
+    }
+
+    public function testBundleProtectsApiDocsWhenHostHasNoAccessControl(): void
+    {
+        $container = new ContainerBuilder();
+        $container->registerExtension(new SecurityExtension());
+
+        (new MajpanelExtension())->prepend($container);
+
+        $accessControl = $container->getExtensionConfig('security')[0]['access_control'];
+        self::assertSame(
+            ['path' => '^/api/docs(?:[./]|$)', 'roles' => 'ROLE_ADMIN'],
+            $accessControl[1],
+        );
+        self::assertSame(
+            ['path' => '^/api/admin(?:/|$)', 'roles' => 'ROLE_ADMIN'],
+            $accessControl[2],
+        );
     }
 
     public function testBundleCompletesAHostDeclaredMajpanelFirewall(): void

@@ -129,11 +129,15 @@ configuration files. Add the Majpanel rules to the host application's existing
 security:
     access_control:
         - { path: '^/majpanel/admin/login$', roles: PUBLIC_ACCESS }
+        - { path: '^/api/docs(?:[./]|$)', roles: ROLE_ADMIN }
+        - { path: '^/api/admin(?:/|$)', roles: ROLE_ADMIN }
         - { path: '^/majpanel/admin(?:/|$)', roles: ROLE_ADMIN }
 ```
 
 When the host application has no `access_control` section, the bundle adds
-these two rules automatically. When one already exists, the bundle leaves it
+these rules automatically. The `/api/docs` UI and its format variants are
+therefore available only to authenticated `ROLE_ADMIN` users. When an
+`access_control` section already exists, the bundle leaves it
 untouched to avoid Symfony's non-mergeable configuration error.
 
 The access-control rules are order-sensitive. Public login and API rules must
@@ -175,6 +179,10 @@ npm run dev
 Existing files are preserved. JSON configuration such as `package.json` and
 `assets/controllers.json` is merged so existing application dependencies and
 Stimulus controllers remain intact.
+
+When the host also uses AssetMapper, the bundle excludes Majpanel's raw
+Tailwind input from its asset map. That stylesheet is compiled exclusively by
+the Majpanel Webpack Encore entry.
 
 `majpanel:create-admin` is an alias of `majpanel:init`. In development, the
 defaults are `admin` and `123456`, and two sample Blog records are created.

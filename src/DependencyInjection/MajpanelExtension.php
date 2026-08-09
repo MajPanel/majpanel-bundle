@@ -18,6 +18,19 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
 
     public function prepend(ContainerBuilder $container): void
     {
+        if ($container->hasExtension('framework') && interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)) {
+            $container->prependExtensionConfig('framework', [
+                'asset_mapper' => [
+                    'excluded_patterns' => [
+                        '*/assets/majpanel*',
+                        '*/assets/styles/majpanel.css',
+                        '*/assets/react/*.tsx',
+                        '*/assets/react/**/*.tsx',
+                    ],
+                ],
+            ]);
+        }
+
         if ($container->hasExtension('security')) {
             $hostSecurityConfigs = $container->getExtensionConfig('security');
             $securityConfig = $this->loadSecurityConfig();
@@ -33,6 +46,8 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
             if (!$hostDefinesAccessControl) {
                 $securityConfig['access_control'] = [
                     ['path' => '^/majpanel/admin/login$', 'roles' => 'PUBLIC_ACCESS'],
+                    ['path' => '^/api/docs(?:[./]|$)', 'roles' => 'ROLE_ADMIN'],
+                    ['path' => '^/api/admin(?:/|$)', 'roles' => 'ROLE_ADMIN'],
                     ['path' => '^/majpanel/admin(?:/|$)', 'roles' => 'ROLE_ADMIN'],
                 ];
             }
