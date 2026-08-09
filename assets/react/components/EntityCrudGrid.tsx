@@ -163,6 +163,15 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         const url = editingId === undefined ? apiUrl : `${apiUrl}/${encodeURIComponent(String(editingId))}`;
         const payload = Object.fromEntries(fields.filter((field) => field.editable).map((field) => {
             let value = values[field.name];
+            if (field.kind === 'relation') {
+                if (field.relation?.multiple) {
+                    value = Array.isArray(value)
+                        ? value.filter((item): item is string => typeof item === 'string' && item.trim() !== '')
+                        : [];
+                } else if (typeof value !== 'string' || value.trim() === '') {
+                    value = null;
+                }
+            }
             if (field.kind === 'number' && value !== '') value = Number(value);
             if (field.kind === 'json' && typeof value === 'string' && value !== '') value = JSON.parse(value);
             return [field.name, value];

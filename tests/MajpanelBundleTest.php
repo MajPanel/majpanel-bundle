@@ -91,6 +91,8 @@ JS);
             self::assertStringContainsString('hasNextPage', $grid);
             self::assertStringContainsString("type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany'", $grid);
             self::assertStringContainsString('targetApiUrl?: string', $grid);
+            self::assertStringContainsString("typeof value !== 'string' || value.trim() === ''", $grid);
+            self::assertStringContainsString('value = null', $grid);
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
