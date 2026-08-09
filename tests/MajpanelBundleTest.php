@@ -67,6 +67,10 @@ JS);
             self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
 
+            $styles = (string) file_get_contents($projectDir.'/assets/styles/majpanel.css');
+            self::assertStringContainsString('@source "../../templates";', $styles);
+            self::assertStringContainsString('@source "../../vendor/majpanel/majpanel-bundle/templates";', $styles);
+
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
             self::assertStringContainsString(".addEntry('majpanel', './assets/majpanel.ts')", $webpack);
