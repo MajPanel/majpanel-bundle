@@ -1,4 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import RelationAutocomplete from './RelationAutocomplete';
+import RichTextEditor from './RichTextEditor';
 
 export type EntityField = {
     name: string;
@@ -59,6 +61,19 @@ function displayValue(value: unknown): string {
 function initialValues(fields: EntityField[], record?: EntityRecord): EntityRecord {
     return Object.fromEntries(fields.filter((field) => field.editable).map((field) => {
         const value = record?.[field.name];
+        if (field.kind === 'relation') {
+            const relationValue = (item: unknown): string => {
+                if (typeof item === 'string') return item;
+                if (item && typeof item === 'object') {
+                    const object = item as Record<string, unknown>;
+                    return String(object['@id'] ?? object.id ?? '');
+                }
+                return '';
+            };
+            return [field.name, field.relation?.multiple
+                ? (Array.isArray(value) ? value.map(relationValue).filter(Boolean) : [])
+                : relationValue(value)];
+        }
         if (field.kind === 'boolean') return [field.name, Boolean(value)];
         if (field.kind === 'json' && value && typeof value === 'object') {
             return [field.name, JSON.stringify(value, null, 2)];
@@ -168,8 +183,22 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                 <h2 className="text-xl font-semibold">{editing ? `Edit ${title}` : `Create ${title}`}</h2>
                 {fields.filter((field) => field.editable).map((field) => <label className="block" key={field.name}>
                     <span className="mb-1 block text-sm font-medium">{field.label}</span>
-                    {field.kind === 'textarea' || field.kind === 'json'
-                        ? <textarea className="min-h-28 w-full rounded border px-3 py-2" required={field.required} value={String(values[field.name] ?? '')} onChange={(event) => setValues({ ...values, [field.name]: event.target.value })} />
+                    {field.kind === 'relation' && field.relation
+                        ? <RelationAutocomplete
+                            label={field.label}
+                            optionsUrl={field.relation.optionsUrl}
+                            labelFields={field.relation.labelFields}
+                            multiple={field.relation.multiple}
+                            required={field.required}
+                            value={(field.relation.multiple
+                                ? (Array.isArray(values[field.name]) ? values[field.name] : [])
+                                : String(values[field.name] ?? '')) as string | string[]}
+                            onChange={(value) => setValues({ ...values, [field.name]: value })}
+                        />
+                        : field.kind === 'textarea'
+                            ? <RichTextEditor label={field.label} required={field.required} value={String(values[field.name] ?? '')} onChange={(value) => setValues({ ...values, [field.name]: value })} />
+                            : field.kind === 'json'
+                                ? <textarea className="min-h-28 w-full rounded border px-3 py-2" required={field.required} value={String(values[field.name] ?? '')} onChange={(event) => setValues({ ...values, [field.name]: event.target.value })} />
                         : field.kind === 'boolean'
                             ? <input type="checkbox" checked={Boolean(values[field.name])} onChange={(event) => setValues({ ...values, [field.name]: event.target.checked })} />
                             : <input className="w-full rounded border px-3 py-2" type={field.kind === 'number' ? 'number' : field.kind === 'date' ? 'date' : field.kind === 'datetime' ? 'datetime-local' : 'text'} required={field.required} maxLength={field.maxLength} step={field.step} value={String(values[field.name] ?? '')} onChange={(event) => setValues({ ...values, [field.name]: event.target.value })} />}

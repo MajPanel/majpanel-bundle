@@ -23,11 +23,15 @@ final class FrontendInstaller
         $files = [
             $bundleDir.'/postcss.config.js' => $this->projectDir.'/postcss.config.js',
             $bundleDir.'/tsconfig.json' => $this->projectDir.'/tsconfig.json',
+        ];
+        $managedFiles = [
             $bundleDir.'/assets/app.ts' => $this->projectDir.'/assets/majpanel.ts',
-            $bundleDir.'/assets/majpanel_stimulus_bootstrap.js' => $this->projectDir.'/assets/majpanel_stimulus_bootstrap.js',
+            $bundleDir.'/assets/majpanel_stimulus_bootstrap.cjs' => $this->projectDir.'/assets/majpanel_stimulus_bootstrap.cjs',
             $bundleDir.'/assets/majpanel.d.ts' => $this->projectDir.'/assets/majpanel.d.ts',
             $bundleDir.'/assets/styles/majpanel.css' => $this->projectDir.'/assets/styles/majpanel.css',
             $bundleDir.'/assets/react/components/EntityCrudGrid.tsx' => $this->projectDir.'/assets/react/components/EntityCrudGrid.tsx',
+            $bundleDir.'/assets/react/components/RelationAutocomplete.tsx' => $this->projectDir.'/assets/react/components/RelationAutocomplete.tsx',
+            $bundleDir.'/assets/react/components/RichTextEditor.tsx' => $this->projectDir.'/assets/react/components/RichTextEditor.tsx',
         ];
 
         $installed = [];
@@ -37,6 +41,15 @@ final class FrontendInstaller
             }
 
             $this->filesystem->copy($source, $target);
+            $installed[] = $target;
+        }
+
+        foreach ($managedFiles as $source => $target) {
+            if (is_file($target) && hash_file('sha256', $source) === hash_file('sha256', $target)) {
+                continue;
+            }
+
+            $this->filesystem->copy($source, $target, true);
             $installed[] = $target;
         }
 
@@ -109,7 +122,7 @@ final class FrontendInstaller
             ) ?? $updated;
         }
 
-        if (!str_contains($updated, 'enableTypeScriptLoader(')) {
+        if (preg_match('/^\s*\.enableTypeScriptLoader\(/m', $updated) !== 1) {
             $updated = preg_replace(
                 '/\R;\R/',
                 "\n    .enableTypeScriptLoader()\n;\n",

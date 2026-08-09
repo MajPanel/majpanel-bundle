@@ -1,2 +1,2 @@
-import './majpanel_stimulus_bootstrap.js';
+import './majpanel_stimulus_bootstrap.cjs';
 import './styles/majpanel.css';

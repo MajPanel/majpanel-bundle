@@ -8,10 +8,15 @@
     },
     "dependencies": {
         "@hotwired/stimulus": "^3.2.2",
+        "@ckeditor/ckeditor5-react": "^11.2.0",
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.0",
+        "@mui/material": "^7.3.0 || ^8.0.0 || ^9.0.0",
         "@symfony/stimulus-bridge": "^4.0.1",
         "@symfony/ux-react": "file:vendor/symfony/ux-react/assets",
         "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
         "core-js": "^3.49.0",
+        "ckeditor5": "^48.3.0",
         "react": "^19.2.0",
         "react-dom": "^19.2.0"
     },

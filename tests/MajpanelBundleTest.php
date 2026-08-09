@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace Majpanel\MajpanelBundle\Tests;
 
+use ApiPlatform\Metadata\ApiResource;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Majpanel\MajpanelBundle\Controller\AdminController;
 use Majpanel\MajpanelBundle\DependencyInjection\MajpanelExtension;
+use Majpanel\MajpanelBundle\Entity\Blog;
 use Majpanel\MajpanelBundle\MajpanelBundle;
 use Majpanel\MajpanelBundle\Security\MajpanelAuthenticator;
 use Majpanel\MajpanelBundle\Service\FrontendInstaller;
@@ -22,6 +24,15 @@ use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
 {
+    public function testDemoBlogIsAStatefulProtectedApiResource(): void
+    {
+        $resource = (new \ReflectionClass(Blog::class))->getAttributes(ApiResource::class)[0]->newInstance();
+
+        self::assertSame('/admin', $resource->getRoutePrefix());
+        self::assertSame("is_granted('ROLE_ADMIN')", $resource->getSecurity());
+        self::assertFalse($resource->getStateless());
+    }
+
     public function testFrontendInstallerCreatesAnEncoreReactScaffoldWithoutOverwritingFiles(): void
     {
         $filesystem = new Filesystem();
@@ -50,7 +61,10 @@ JS);
             self::assertContains($projectDir.'/package.json', $installed);
             self::assertFileExists($projectDir.'/webpack.config.js');
             self::assertFileExists($projectDir.'/assets/majpanel.ts');
+            self::assertFileExists($projectDir.'/assets/majpanel_stimulus_bootstrap.cjs');
             self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);
