@@ -89,6 +89,8 @@ JS);
             self::assertStringContainsString("url.searchParams.set('page', String(page))", $grid);
             self::assertStringContainsString("object.totalItems ?? object['hydra:totalItems']", $grid);
             self::assertStringContainsString('hasNextPage', $grid);
+            self::assertStringContainsString("type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany'", $grid);
+            self::assertStringContainsString('targetApiUrl?: string', $grid);
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);

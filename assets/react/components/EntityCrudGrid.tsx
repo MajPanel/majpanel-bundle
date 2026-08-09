@@ -14,7 +14,10 @@ export type EntityField = {
     maxLength?: number;
     step?: number;
     relation?: {
+        type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany';
         multiple: boolean;
+        target?: string;
+        targetApiUrl?: string;
         optionsUrl: string;
         labelFields: string[];
     };
