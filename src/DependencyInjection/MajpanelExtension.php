@@ -4,34 +4,26 @@ declare(strict_types=1);
 
 namespace Majpanel\MajpanelBundle\DependencyInjection;
 
-use Majpanel\MajpanelBundle\Entity\AdminUser;
+use Majpanel\MajpanelBundle\Security\MajpanelAuthenticator;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\Extension;
 use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
+use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelExtension extends Extension implements PrependExtensionInterface
 {
+    private const FIREWALL_NAME = 'majpanel';
+
     public function prepend(ContainerBuilder $container): void
     {
         if ($container->hasExtension('security')) {
-            $securityConfig = [
-                'password_hashers' => [
-                    AdminUser::class => 'auto',
-                ],
-                'providers' => [
-                    'majpanel_admin_provider' => [
-                        'entity' => [
-                            'class' => AdminUser::class,
-                            'property' => 'username',
-                        ],
-                    ],
-                ],
-            ];
+            $hostSecurityConfigs = $container->getExtensionConfig('security');
+            $securityConfig = $this->loadSecurityConfig();
 
             $hostDefinesAccessControl = false;
-            foreach ($container->getExtensionConfig('security') as $config) {
+            foreach ($hostSecurityConfigs as $config) {
                 if (array_key_exists('access_control', $config)) {
                     $hostDefinesAccessControl = true;
                     break;
@@ -46,6 +38,26 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
             }
 
             $container->prependExtensionConfig('security', $securityConfig);
+
+            if ($this->hostDefinesMajpanelFirewall($hostSecurityConfigs)) {
+                // Symfony requires firewall names and their order to be declared
+                // by the host. The bundle can safely complete an existing one.
+                $container->loadFromExtension('security', [
+                    'firewalls' => [
+                        self::FIREWALL_NAME => [
+                            'lazy' => true,
+                            'provider' => 'majpanel_admin_provider',
+                            'custom_authenticators' => [MajpanelAuthenticator::class],
+                            'entry_point' => MajpanelAuthenticator::class,
+                            'logout' => [
+                                'path' => 'majpanel_logout',
+                                'target' => 'majpanel_login',
+                                'enable_csrf' => true,
+                            ],
+                        ],
+                    ],
+                ]);
+            }
         }
 
         if ($container->hasExtension('api_platform')) {
@@ -71,5 +83,29 @@ final class MajpanelExtension extends Extension implements PrependExtensionInter
         );
 
         $loader->load('services.yaml');
+    }
+
+    /** @return array<string, mixed> */
+    private function loadSecurityConfig(): array
+    {
+        $configuration = Yaml::parseFile(\dirname(__DIR__, 2).'/config/packages/security.yaml');
+
+        if (!isset($configuration['security']) || !\is_array($configuration['security'])) {
+            throw new \LogicException('Majpanel security configuration must contain a "security" section.');
+        }
+
+        return $configuration['security'];
+    }
+
+    /** @param list<array<string, mixed>> $securityConfigs */
+    private function hostDefinesMajpanelFirewall(array $securityConfigs): bool
+    {
+        foreach ($securityConfigs as $config) {
+            if (isset($config['firewalls'][self::FIREWALL_NAME])) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

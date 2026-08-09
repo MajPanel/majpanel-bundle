@@ -1,30 +1,17 @@
 security:
-    password_hashers:
-        Majpanel\MajpanelBundle\Entity\AdminUser: auto
-
-    providers:
-        majpanel_admin_provider:
-            entity:
-                class: Majpanel\MajpanelBundle\Entity\AdminUser
-                property: username
-
     firewalls:
-        dev: hh
+        dev:
             pattern: ^/(_profiler|_wdt|assets|build|bundles/majpanel)/
             security: false
+
         majpanel:
             pattern: ^/(?:majpanel/admin|api/admin)(?:/|$)
+            # MajpanelBundle adds the provider, MajpanelAuthenticator,
+            # login entry point, and logout behavior to this firewall.
+
+        # Keep the host application's catch-all firewall after majpanel.
+        main:
             lazy: true
-            provider: majpanel_admin_provider
-            form_login:
-                login_path: majpanel_login
-                check_path: majpanel_login
-                enable_csrf: true
-                default_target_path: majpanel_admin_dashboard
-            logout:
-                path: majpanel_logout
-                target: majpanel_login
-                enable_csrf: true
 
     # Only the first matching access-control rule is applied.
     access_control:

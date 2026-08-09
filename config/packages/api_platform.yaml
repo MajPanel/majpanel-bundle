@@ -1,0 +1,10 @@
+api_platform:
+    title: MajPanel API
+    version: 1.0.0
+    defaults:
+        # These defaults affect every API resource in the host application.
+        route_prefix: /admin
+        security: "is_granted('ROLE_ADMIN')"
+        stateless: false
+        cache_headers:
+            vary: ['Content-Type', 'Authorization', 'Origin']

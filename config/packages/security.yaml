@@ -1,0 +1,9 @@
+security:
+    password_hashers:
+        Majpanel\MajpanelBundle\Entity\AdminUser: auto
+
+    providers:
+        majpanel_admin_provider:
+            entity:
+                class: Majpanel\MajpanelBundle\Entity\AdminUser
+                property: username

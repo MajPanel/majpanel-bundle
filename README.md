@@ -102,11 +102,24 @@ prefix.
 
 ## Security
 
-The bundle registers the `AdminUser` password hasher and entity provider.
-Symfony requires every firewall to be declared in one configuration section,
-so add the dedicated `majpanel` firewall from
-`docs/config-examples/security.yaml` to the host application's existing
-`config/packages/security.yaml`, before its catch-all `main` firewall.
+The bundle loads its `AdminUser` password hasher and entity provider from
+`config/packages/security.yaml` and registers `MajpanelAuthenticator` as a
+service. Symfony requires every firewall name and its order to be declared in
+one application configuration section, so reserve the dedicated `majpanel`
+firewall in the host application's `config/packages/security.yaml`, before its
+catch-all `main` firewall:
+
+```yaml
+security:
+    firewalls:
+        majpanel:
+            pattern: ^/(?:majpanel/admin|api/admin)(?:/|$)
+        main:
+            # Keep the host application's existing firewall configuration.
+```
+
+The bundle completes the declared `majpanel` firewall with its entity
+provider, custom authenticator, login entry point, and CSRF-protected logout.
 
 Symfony does not allow `security.access_control` to be merged from multiple
 configuration files. Add the Majpanel rules to the host application's existing
