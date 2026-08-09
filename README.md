@@ -147,7 +147,9 @@ parameters:
     majpanel.entity_namespace: 'Domain\Entity'
 ```
 
-Import the bundle routes from the host application's `config/routes.yaml`:
+All Majpanel route definitions and controllers live in the bundle. Symfony
+still needs one route-discovery import in the host application's
+`config/routes.yaml` (a Symfony Flex recipe can install this automatically):
 
 ```yaml
 majpanel:

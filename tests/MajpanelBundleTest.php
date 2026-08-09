@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Majpanel\MajpanelBundle\Tests;
 
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Majpanel\MajpanelBundle\Controller\AdminController;
 use Majpanel\MajpanelBundle\DependencyInjection\MajpanelExtension;
 use Majpanel\MajpanelBundle\MajpanelBundle;
 use Majpanel\MajpanelBundle\Security\MajpanelAuthenticator;
@@ -13,6 +14,8 @@ use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
@@ -23,6 +26,18 @@ final class MajpanelBundleTest extends TestCase
 
         self::assertInstanceOf(MajpanelExtension::class, $bundle->getContainerExtension());
         self::assertSame(\dirname(__DIR__), $bundle->getPath());
+    }
+
+    public function testBundleDefinesAProtectedAdminDashboardRoute(): void
+    {
+        $controller = new \ReflectionClass(AdminController::class);
+        $authorization = $controller->getAttributes(IsGranted::class)[0]->newInstance();
+        $route = $controller->getMethod('dashboard')->getAttributes(Route::class)[0]->newInstance();
+
+        self::assertSame('ROLE_ADMIN', $authorization->attribute);
+        self::assertSame('/majpanel/admin', $route->path);
+        self::assertSame('majpanel_admin_dashboard', $route->name);
+        self::assertSame(['GET'], $route->methods);
     }
 
     public function testSecurityExampleConfiguresTheMajpanelLoginFirewall(): void
