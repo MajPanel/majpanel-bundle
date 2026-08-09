@@ -6,9 +6,8 @@ if (!Encore.isRuntimeEnvironmentConfigured()) {
 
 Encore
     .setOutputPath('public/build/')
-    .setPublicPath('/bundles/majpanel/build')
-    .setManifestKeyPrefix('bundles/majpanel/build/')
-    .addEntry('majpanel', './assets/app.ts')
+    .setPublicPath('/build')
+    .addEntry('majpanel', './assets/majpanel.ts')
     .splitEntryChunks()
     .enableReactPreset()
     .enableStimulusBridge('./assets/controllers.json')
@@ -17,12 +16,6 @@ Encore
     .enablePostCssLoader()
     .enableSourceMaps(!Encore.isProduction())
     .enableVersioning(Encore.isProduction())
-    .configureBabel((config) => {
-        config.plugins.push([
-            'polyfill-corejs3',
-            { method: 'usage-global', version: '3.49' },
-        ]);
-    })
     .enableTypeScriptLoader()
 ;
 

@@ -163,6 +163,19 @@ php bin/console doctrine:migrations:migrate
 php bin/console majpanel:init
 ```
 
+The initializer also installs the Majpanel React/Encore scaffold when it is
+missing, including `package.json`, the `majpanel` entry, Tailwind CSS, and the
+shared `EntityCrudGrid` component. Compile it after the first initialization:
+
+```bash
+npm install
+npm run dev
+```
+
+Existing files are preserved. JSON configuration such as `package.json` and
+`assets/controllers.json` is merged so existing application dependencies and
+Stimulus controllers remain intact.
+
 `majpanel:create-admin` is an alias of `majpanel:init`. In development, the
 defaults are `admin` and `123456`, and two sample Blog records are created.
 Use `--no-demo` to skip sample data. The default password is rejected in the

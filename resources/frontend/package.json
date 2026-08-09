@@ -1,11 +1,6 @@
 {
-    "name": "@majpanel/majpanel-bundle",
-    "version": "0.1.0",
     "private": true,
-    "type": "module",
-    "license": "GPL-2.0-or-later",
     "scripts": {
-        "dev-server": "encore dev-server",
         "dev": "encore dev",
         "watch": "encore dev --watch",
         "build": "encore production --progress"

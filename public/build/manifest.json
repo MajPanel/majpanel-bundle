@@ -1,0 +1,6 @@
+{
+  "bundles/majpanel/build/majpanel.css": "/bundles/majpanel/build/majpanel.css",
+  "bundles/majpanel/build/majpanel.js": "/bundles/majpanel/build/majpanel.js",
+  "bundles/majpanel/build/runtime.js": "/bundles/majpanel/build/runtime.js",
+  "bundles/majpanel/build/vendors-node_modules_symfony_stimulus-bridge_dist_index_js-node_modules_core-js_modules_es_ar-517a57.js": "/bundles/majpanel/build/vendors-node_modules_symfony_stimulus-bridge_dist_index_js-node_modules_core-js_modules_es_ar-517a57.js"
+}

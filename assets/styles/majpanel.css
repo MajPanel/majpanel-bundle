@@ -1,0 +1,25 @@
+@import "tailwindcss";
+
+@source "../../../templates";
+@source "../../../vendor/majpanel/majpanel-bundle/templates";
+@source "../react";
+
+.majpanel-modal-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+    display: grid;
+    place-items: center;
+    padding: 1rem;
+    background: rgb(15 23 42 / 45%);
+}
+
+.majpanel-modal {
+    width: min(42rem, 100%);
+    max-height: calc(100vh - 2rem);
+    overflow: auto;
+    border-radius: .5rem;
+    background: white;
+    padding: 1.5rem;
+    box-shadow: 0 20px 50px rgb(15 23 42 / 30%);
+}

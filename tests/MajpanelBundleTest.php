@@ -9,17 +9,43 @@ use Majpanel\MajpanelBundle\Controller\AdminController;
 use Majpanel\MajpanelBundle\DependencyInjection\MajpanelExtension;
 use Majpanel\MajpanelBundle\MajpanelBundle;
 use Majpanel\MajpanelBundle\Security\MajpanelAuthenticator;
+use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
 use Symfony\Bundle\SecurityBundle\DependencyInjection\SecurityExtension;
 use Symfony\Component\Config\Definition\Processor;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
+use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
 {
+    public function testFrontendInstallerCreatesAnEncoreReactScaffoldWithoutOverwritingFiles(): void
+    {
+        $filesystem = new Filesystem();
+        $projectDir = sys_get_temp_dir().'/majpanel-frontend-'.bin2hex(random_bytes(6));
+        $filesystem->mkdir($projectDir.'/assets');
+        $filesystem->dumpFile($projectDir.'/assets/controllers.json', "{\n    \"controllers\": {},\n    \"entrypoints\": []\n}\n");
+
+        try {
+            $installer = new FrontendInstaller($filesystem, $projectDir);
+            $installed = $installer->install();
+
+            self::assertContains($projectDir.'/package.json', $installed);
+            self::assertFileExists($projectDir.'/webpack.config.js');
+            self::assertFileExists($projectDir.'/assets/majpanel.ts');
+            self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+
+            $controllers = json_decode((string) file_get_contents($projectDir.'/assets/controllers.json'), true, 512, JSON_THROW_ON_ERROR);
+            self::assertTrue($controllers['controllers']['@symfony/ux-react']['react']['enabled']);
+            self::assertSame([], $installer->install());
+        } finally {
+            $filesystem->remove($projectDir);
+        }
+    }
+
     public function testBundleExposesExpectedExtension(): void
     {
         $bundle = new MajpanelBundle();

@@ -8,6 +8,7 @@ use Doctrine\ORM\EntityManagerInterface;
 use Majpanel\MajpanelBundle\Entity\AdminUser;
 use Majpanel\MajpanelBundle\Entity\Blog;
 use Majpanel\MajpanelBundle\Service\AdminGenerator;
+use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -29,6 +30,7 @@ final class InitializeMajpanelCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly AdminGenerator $adminGenerator,
+        private readonly FrontendInstaller $frontendInstaller,
         #[Autowire('%kernel.environment%')]
         private readonly string $environment,
     ) {
@@ -68,6 +70,12 @@ HELP);
             $io->error('The default password is disabled in production. Pass a strong password explicitly.');
 
             return Command::INVALID;
+        }
+
+        $installedFrontendFiles = $this->frontendInstaller->install();
+        if ($installedFrontendFiles !== []) {
+            $io->success(sprintf('Installed %d Majpanel frontend file(s).', count($installedFrontendFiles)));
+            $io->note('Run `npm install` and `npm run dev` to compile the Majpanel CSS and React controllers.');
         }
 
         $repository = $this->entityManager->getRepository(AdminUser::class);
