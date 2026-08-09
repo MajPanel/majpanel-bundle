@@ -10,7 +10,7 @@ use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity]
 #[ORM\Table(name: 'majpanel_blog')]
-#[ApiResource]
+#[ApiResource(routePrefix: '/admin')]
 final class Blog
 {
     #[ORM\Id]

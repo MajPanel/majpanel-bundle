@@ -102,10 +102,10 @@ prefix.
 
 ## Security
 
-An opt-in security configuration is available at
-`docs/config-examples/security.yaml`. Adapt the provider and dashboard route
-when needed before merging it into the host application's
-`config/packages/security.yaml`.
+The bundle provides default security configuration for its `AdminUser`, login,
+and logout routes. A complete reference is available at
+`docs/config-examples/security.yaml`. Host applications can override the
+defaults in their own `config/packages/security.yaml`.
 
 The access-control rules are order-sensitive. Public login and API rules must
 remain above the broader `/api` and `/admin` administrator rules.
@@ -136,3 +136,9 @@ php bin/console majpanel:init
 defaults are `admin` and `123456`, and two sample Blog records are created.
 Use `--no-demo` to skip sample data. The default password is rejected in the
 production environment.
+
+Reset an existing administrator password explicitly:
+
+```bash
+php bin/console majpanel:create-admin admin 'a-new-password' --reset-password --no-demo
+```

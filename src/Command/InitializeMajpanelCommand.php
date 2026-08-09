@@ -41,12 +41,14 @@ final class InitializeMajpanelCommand extends Command
             ->addArgument('username', InputArgument::OPTIONAL, 'Administrator username', 'admin')
             ->addArgument('password', InputArgument::OPTIONAL, 'Administrator password', '123456')
             ->addOption('no-demo', null, InputOption::VALUE_NONE, 'Do not create sample blog posts')
+            ->addOption('reset-password', null, InputOption::VALUE_NONE, 'Replace the password when the administrator already exists')
             ->setHelp(<<<'HELP'
 Initializes a development Majpanel installation after migrations have run.
 
 Examples:
   php bin/console majpanel:init
   php bin/console majpanel:create-admin editor 'a-strong-password' --no-demo
+  php bin/console majpanel:create-admin admin 'a-new-password' --reset-password --no-demo
 HELP);
     }
 
@@ -77,6 +79,9 @@ HELP);
             $admin->setPassword($this->passwordHasher->hashPassword($admin, $password));
             $this->entityManager->persist($admin);
             $io->success(sprintf('Created Majpanel administrator "%s".', $username));
+        } elseif ($input->getOption('reset-password')) {
+            $admin->setPassword($this->passwordHasher->hashPassword($admin, $password));
+            $io->success(sprintf('Updated the password for Majpanel administrator "%s".', $username));
         } else {
             $io->note(sprintf('Majpanel administrator "%s" already exists; its password was not changed.', $username));
         }

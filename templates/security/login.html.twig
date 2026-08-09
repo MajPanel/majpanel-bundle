@@ -23,7 +23,7 @@
         <div class="error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
     {% endif %}
 
-    <form method="post">
+    <form method="post" action="{{ path('majpanel_login') }}">
         <label for="username">Username</label>
         <input id="username" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
 

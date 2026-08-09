@@ -1,9 +1,9 @@
 security:
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        Majpanel\MajpanelBundle\Entity\AdminUser: auto
 
     providers:
-        app_user_provider:
+        majpanel_admin_provider:
             entity:
                 class: Majpanel\MajpanelBundle\Entity\AdminUser
                 property: username
@@ -14,7 +14,7 @@ security:
             security: false
         main:
             lazy: true
-            provider: app_user_provider
+            provider: majpanel_admin_provider
             form_login:
                 login_path: majpanel_login
                 check_path: majpanel_login
@@ -27,11 +27,11 @@ security:
 
     # Only the first matching access-control rule is applied.
     access_control:
-        - { path: '^/admin/login$', roles: PUBLIC_ACCESS }
+        - { path: '^/majpanel/admin/login$', roles: PUBLIC_ACCESS }
         - { path: '^/api/public(?:/|$)', roles: PUBLIC_ACCESS }
         - { path: '^/api/admin(?:/|$)', roles: ROLE_ADMIN }
         - { path: '^/api(?:/|$)', roles: ROLE_ADMIN }
-        - { path: '^/admin', roles: ROLE_ADMIN }
+        - { path: '^/majpanel/admin(?:/|$)', roles: ROLE_ADMIN }
 
 when@test:
     security:

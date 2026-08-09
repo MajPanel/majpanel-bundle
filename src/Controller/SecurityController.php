@@ -11,7 +11,7 @@ use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
 
 final class SecurityController extends AbstractController
 {
-    #[Route('/admin/login', name: 'majpanel_login', methods: ['GET', 'POST'])]
+    #[Route('/majpanel/admin/login', name: 'majpanel_login', methods: ['GET', 'POST'])]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
         if ($this->getUser() !== null) {
@@ -24,7 +24,7 @@ final class SecurityController extends AbstractController
         ]);
     }
 
-    #[Route('/admin/logout', name: 'majpanel_logout', methods: ['POST'])]
+    #[Route('/majpanel/admin/logout', name: 'majpanel_logout', methods: ['POST'])]
     public function logout(): never
     {
         throw new \LogicException('This method is intercepted by the logout firewall.');

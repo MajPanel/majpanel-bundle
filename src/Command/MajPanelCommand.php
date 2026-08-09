@@ -1,14 +1,3 @@
-api_platform:
-    title: MajPanel API
-    version: 1.0.0
-    defaults:
-        # Every API resource is an authenticated admin API by default.
-        # Public frontend operations must explicitly override these values.
-        route_prefix: /admin
-        security: "is_granted('ROLE_ADMIN')"
-        stateless: false
-        cache_headers:
-            vary: ['Content-Type', 'Authorization', 'Origin']
 <?php
 
 declare(strict_types=1);
