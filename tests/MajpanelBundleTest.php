@@ -40,6 +40,19 @@ final class MajpanelBundleTest extends TestCase
         self::assertSame(['GET'], $route->methods);
     }
 
+    public function testBundleDefinesAProtectedGeneratedEntityRoute(): void
+    {
+        $controller = new \ReflectionClass(AdminController::class);
+        $authorization = $controller->getAttributes(IsGranted::class)[0]->newInstance();
+        $route = $controller->getMethod('entity')->getAttributes(Route::class)[0]->newInstance();
+
+        self::assertSame('ROLE_ADMIN', $authorization->attribute);
+        self::assertSame('/majpanel/admin/{entity}', $route->path);
+        self::assertSame('majpanel_admin_entity', $route->name);
+        self::assertSame('[a-z0-9]+(?:[-_][a-z0-9]+)*', $route->requirements['entity']);
+        self::assertSame(['GET'], $route->methods);
+    }
+
     public function testSecurityExampleConfiguresTheMajpanelLoginFirewall(): void
     {
         $configuration = Yaml::parseFile(\dirname(__DIR__).'/docs/config-examples/security.yaml');

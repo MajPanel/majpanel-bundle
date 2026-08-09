@@ -17,4 +17,15 @@ final class AdminController extends AbstractController
     {
         return $this->render('@Majpanel/admin/index.html.twig');
     }
+
+    #[Route(
+        '/majpanel/admin/{entity}',
+        name: 'majpanel_admin_entity',
+        requirements: ['entity' => '[a-z0-9]+(?:[-_][a-z0-9]+)*'],
+        methods: ['GET'],
+    )]
+    public function entity(string $entity): Response
+    {
+        return $this->render(sprintf('admin/%s/index.html.twig', $entity));
+    }
 }
