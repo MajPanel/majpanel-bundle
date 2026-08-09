@@ -1,0 +1,52 @@
+{% extends '@Majpanel/base.html.twig' %}
+
+{% block title %}{% block admin_title %}Administration{% endblock %} · Majpanel{% endblock %}
+
+{% block body %}
+    <div class="min-h-screen font-sans text-gray-800">
+        <header class="sticky top-0 z-[1200] flex min-h-16 items-center justify-between bg-[#1976d2] px-6 text-white shadow-[0_2px_4px_rgb(0_0_0_/_20%)] max-[700px]:px-4">
+            <a class="flex items-center gap-3 text-xl font-semibold text-inherit no-underline" href="{{ path('majpanel_admin_dashboard') }}" aria-label="Admin home">
+                <span class="text-base max-[700px]:hidden" aria-hidden="true">◆</span>
+                <span>Majpanel</span>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <details class="group relative">
+                    <summary class="cursor-pointer list-none rounded-sm border border-white/50 px-3 py-[7px] select-none hover:bg-white/10 group-open:bg-white/10 [&::-webkit-details-marker]:hidden">About</summary>
+                    <div class="absolute top-[calc(100%+12px)] right-0 z-[1300] box-border w-[min(460px,calc(100vw-32px))] rounded-lg bg-white p-5 text-gray-800 shadow-[0_12px_32px_rgb(0_0_0_/_25%)]">
+                        <h2 class="mb-3 text-lg font-semibold">Majpanel generator</h2>
+                        <p class="mt-3 mb-2 text-sm leading-6 text-gray-600">Create an API Platform entity and generate its React admin page:</p>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console make:entity EntityName --api-resource</code>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console make:migration</code>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console doctrine:migrations:migrate</code>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console majpanel EntityName</code>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">npm run dev</code>
+                        <p class="mt-3 mb-2 text-sm leading-6 text-gray-600">Regenerate or remove an entity admin page:</p>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console majpanel EntityName reinstall</code>
+                        <code class="my-1.5 block overflow-x-auto rounded-sm bg-gray-100 px-2.5 py-2 text-xs whitespace-nowrap text-gray-900">php bin/console majpanel EntityName delete</code>
+                    </div>
+                </details>
+                <span class="max-[700px]:hidden">{{ app.user.userIdentifier }}</span>
+                <form class="m-0" method="post" action="{{ path('majpanel_logout') }}">
+                    <input type="hidden" name="_csrf_token" value="{{ csrf_token('logout') }}">
+                    <button class="cursor-pointer rounded-sm border border-white/50 bg-transparent px-3 py-[7px] font-[inherit] text-white hover:bg-white/10" type="submit">Log out</button>
+                </form>
+            </div>
+        </header>
+
+        <div class="flex min-h-[calc(100vh-64px)]">
+            <aside class="box-border w-[260px] shrink-0 basis-[260px] border-r border-gray-200 bg-white px-4 py-6 max-[700px]:w-24 max-[700px]:basis-24 max-[700px]:px-2 max-[700px]:py-4">
+                <div class="px-3 pb-2 text-xs font-semibold tracking-[.08em] text-gray-500 uppercase max-[700px]:hidden">Entities</div>
+                <nav class="grid gap-2" aria-label="Admin entities">
+                    {% block admin_navigation %}
+                        {% include 'admin/_generated_menu.html.twig' ignore missing %}
+                    {% endblock %}
+                </nav>
+            </aside>
+
+            <main class="min-w-0 flex-1 box-border p-8 max-[700px]:px-4 max-[700px]:py-5">
+                {% block admin_content %}{% endblock %}
+            </main>
+        </div>
+    </div>
+{% endblock %}

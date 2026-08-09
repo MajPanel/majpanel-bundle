@@ -1,0 +1,137 @@
+import Encore from '@symfony/webpack-encore';
+
+// Manually configure the runtime environment if not already configured yet by the "encore" command.
+// It's useful when you use tools that rely on webpack.config.js file.
+if (!Encore.isRuntimeEnvironmentConfigured()) {
+    Encore.configureRuntimeEnvironment(process.env.NODE_ENV || 'dev');
+}
+
+Encore
+    // directory where compiled assets will be stored
+    .setOutputPath('public/build/')
+    // public path used by the web server to access the output path
+    .setPublicPath('/build')
+    // only needed for CDN's or subdirectory deploy
+    //.setManifestKeyPrefix('build/')
+
+    /*
+     * ENTRY CONFIG
+     *
+     * Each entry will result in one JavaScript file (e.g. app.js)
+     * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
+     */
+    .addEntry('app', './assets/app.ts')
+
+    // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
+    .splitEntryChunks()
+
+    .enableReactPreset()
+
+    // enables the Symfony UX Stimulus bridge (used in assets/stimulus_bootstrap.js)
+    .enableStimulusBridge('./assets/controllers.json')
+
+    // will require an extra script tag for runtime.js
+    // but, you probably want this, unless you're building a single-page app
+    .enableSingleRuntimeChunk()
+
+    /*
+     * FEATURE CONFIG
+     *
+     * Enable & configure other features below. For a full
+     * list of features, see:
+     * https://symfony.com/doc/current/frontend.html#adding-more-features
+     */
+    .cleanupOutputBeforeBuild()
+
+    // Process Tailwind CSS through PostCSS.
+    .enablePostCssLoader()
+
+    // Displays build status system notifications to the user
+    // .enableBuildNotifications()
+
+    .enableSourceMaps(!Encore.isProduction())
+    // enables hashed filenames (e.g. app.abc123.css)
+    .enableVersioning(Encore.isProduction())
+
+    // Configure JS and CSS minimizers
+    // .configureJsMinimizerPlugin((options, MinimizerPlugin) => {
+    //     options.minify = MinimizerPlugin.esbuildMinify
+    // })
+    // .configureCssMinimizerPlugin((options, MinimizerPlugin) => {
+    //     options.minify = MinimizerPlugin.lightningCssMinify;
+    // })
+
+    // configure Babel
+    .configureBabel((config) => {
+        config.plugins.push(['polyfill-corejs3', { method: 'usage-global', version: '3.49' }]);
+    })
+
+    // enables Sass/SCSS support
+    //.enableSassLoader()
+
+    // uncomment if you use TypeScript
+    .enableTypeScriptLoader()
+
+    // uncomment if you use React
+    //.enableReactPreset()
+
+    // uncomment to get integrity="..." attributes on your script & link tags
+    // requires WebpackEncoreBundle 1.4 or higher
+    //.enableIntegrityHashes(Encore.isProduction())
+
+    // uncomment if you're having problems with a jQuery plugin
+    //.autoProvidejQuery()
+;
+
+export default await Encore.getWebpackConfig();
+{
+    "name": "@majpanel/majpanel-bundle",
+    "version": "0.1.0",
+    "private": true,
+    "type": "module",
+    "license": "GPL-2.0-or-later",
+    "scripts": {
+        "dev-server": "encore dev-server",
+        "dev": "encore dev",
+        "watch": "encore dev --watch",
+        "build": "encore production --progress"
+    },
+    "dependencies": {
+        "@ckeditor/ckeditor5-react": "^11.2.0",
+        "@emotion/react": "^11.14.0",
+        "@emotion/styled": "^11.14.1",
+        "@mui/icons-material": "^9.2.0",
+        "@mui/material": "^9.2.0",
+        "@mui/x-data-grid": "^9.10.1",
+        "ckeditor5": "^48.3.1",
+        "prop-types": "^15.8.1",
+        "react-hook-form": "^7.84.0"
+    },
+    "devDependencies": {
+        "@babel/core": "^8.0.0",
+        "@babel/preset-env": "^8.0.0",
+        "@babel/preset-react": "^8.0.1",
+        "@hotwired/stimulus": "^3.0.0",
+        "@hotwired/turbo": "^7.1.0 || ^8.0",
+        "@symfony/stimulus-bridge": "^3.2.0 || ^4.0.0",
+        "@symfony/ux-react": "file:vendor/symfony/ux-react/assets",
+        "@symfony/ux-turbo": "file:vendor/symfony/ux-turbo/assets",
+        "@symfony/webpack-encore": "^7.0.0",
+        "@tailwindcss/postcss": "^4.3.3",
+        "@types/node": "^26.1.2",
+        "@types/react": "^19.2.18",
+        "@types/react-dom": "^19.2.4",
+        "@types/webpack-env": "^1.18.8",
+        "babel-plugin-polyfill-corejs3": "^1.0.0",
+        "core-js": "^3.49.0",
+        "postcss": "^8.5.25",
+        "postcss-loader": "^8.2.1",
+        "react": "^19.2.8",
+        "react-dom": "^19.2.8",
+        "tailwindcss": "^4.3.3",
+        "ts-loader": "^9.6.2",
+        "typescript": "^6.0.3",
+        "webpack": "^5.82",
+        "webpack-cli": "^7.0.0"
+    }
+}

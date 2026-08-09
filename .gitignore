@@ -1,0 +1,9 @@
+/.idea/
+/.npm/
+/.phpunit.cache/
+/.phpunit.result.cache
+/.vscode/
+/composer.lock
+/node_modules/
+/npm-debug.log*
+/vendor/

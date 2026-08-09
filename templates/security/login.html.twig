@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Admin login</title>
+    <style>
+        :root { color-scheme: light; font-family: system-ui, sans-serif; }
+        body { min-height: 100vh; margin: 0; display: grid; place-items: center; background: #f3f4f6; color: #111827; }
+        main { width: min(360px, calc(100% - 2rem)); padding: 2rem; box-sizing: border-box; border-radius: 14px; background: white; box-shadow: 0 15px 35px rgb(0 0 0 / 10%); }
+        h1 { margin: 0 0 1.5rem; font-size: 1.5rem; }
+        label { display: block; margin: 1rem 0 .4rem; font-weight: 600; }
+        input { width: 100%; box-sizing: border-box; padding: .75rem; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
+        button { width: 100%; margin-top: 1.25rem; padding: .8rem; border: 0; border-radius: 8px; background: #111827; color: white; font: inherit; font-weight: 700; cursor: pointer; }
+        .error { padding: .75rem; border-radius: 8px; background: #fee2e2; color: #991b1b; }
+    </style>
+</head>
+<body>
+<main>
+    <h1>Admin login</h1>
+
+    {% if error %}
+        <div class="error" role="alert">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+    {% endif %}
+
+    <form method="post">
+        <label for="username">Username</label>
+        <input id="username" name="_username" value="{{ last_username }}" autocomplete="username" required autofocus>
+
+        <label for="password">Password</label>
+        <input id="password" type="password" name="_password" autocomplete="current-password" required>
+
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <button type="submit">Sign in</button>
+    </form>
+</main>
+</body>
+</html>

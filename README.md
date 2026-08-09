@@ -1,0 +1,138 @@
+# MajpanelBundle
+
+Reusable Majpanel administration functionality for Symfony applications.
+
+## Requirements
+
+- PHP 8.2 or newer
+- Symfony 7.4 LTS or Symfony 8.x
+
+## Local development
+
+Install dependencies and run the test suite:
+
+```bash
+composer install
+composer test
+```
+
+## Install in an application
+
+During local development, add this repository as a Composer path repository in
+the Symfony application's `composer.json`:
+
+```json
+{
+    "repositories": [
+        {
+            "type": "path",
+            "url": "../majpanel-bundle",
+            "options": { "symlink": true }
+        }
+    ]
+}
+```
+
+Then install it:
+
+```bash
+composer require majpanel/majpanel-bundle:@dev
+```
+
+Symfony Flex normally enables the bundle automatically. Without Flex, add
+`Majpanel\MajpanelBundle\MajpanelBundle::class => ['all' => true]` to
+`config/bundles.php`.
+
+## Source layout
+
+- `src/Controller/` HTTP controllers
+- `src/Command/` Symfony console commands
+- `src/DependencyInjection/` bundle configuration and service loading
+- `src/Entity/` optional Doctrine entities owned by the bundle
+- `src/Repository/` persistence repositories
+- `src/Service/` application services
+- `assets/controllers/` Stimulus controllers
+- `assets/react/` React and TypeScript source files
+- `assets/styles/` Tailwind and application styles
+- `config/` services and route definitions
+- `templates/` Twig templates
+- `translations/` translation catalogues
+- `public/` publishable browser assets
+- `tests/` automated tests
+- `migrations/` production migrations owned exclusively by Majpanel
+
+Application/demo migrations belong under `tests/Fixtures/Migrations/`; they
+must not be registered as production migrations by applications using the
+bundle.
+
+Generated menu examples for demo entities belong under
+`tests/Fixtures/templates/`. The runtime menu is written to the host
+application's `templates/admin/_generated_menu.html.twig` by the `majpanel`
+command.
+
+## Frontend development
+
+The frontend toolchain is kept in this repository so distributable browser
+assets can be built as part of a release. Install PHP dependencies first,
+because the Symfony UX npm packages resolve from `vendor/`:
+
+```bash
+composer install
+npm install
+npm run build
+```
+
+Compiled assets belong in `public/` and are installed into the host
+application by Symfony's `assets:install` command.
+
+The build uses `/bundles/majpanel/build` as its public path so it does not
+collide with the host application's own `/build` directory.
+
+## API Platform
+
+An opt-in API Platform configuration is available at
+`docs/config-examples/api_platform.yaml`. Copy its values into the host
+application's `config/packages/api_platform.yaml` only when all API resources
+should be restricted to authenticated administrators under `/admin`.
+
+The bundle does not load these defaults automatically because API Platform's
+`defaults` section affects every API resource in the host application. Public
+operations must explicitly override `security` and, when needed, their route
+prefix.
+
+## Security
+
+An opt-in security configuration is available at
+`docs/config-examples/security.yaml`. Adapt the provider and dashboard route
+when needed before merging it into the host application's
+`config/packages/security.yaml`.
+
+The access-control rules are order-sensitive. Public login and API rules must
+remain above the broader `/api` and `/admin` administrator rules.
+
+Projects whose Doctrine entities do not use the default `App\Entity`
+namespace can override the generator parameter in `config/services.yaml`:
+
+```yaml
+parameters:
+    majpanel.entity_namespace: 'Domain\Entity'
+```
+
+Import the bundle routes from the host application's `config/routes.yaml`:
+
+```yaml
+majpanel:
+    resource: '@MajpanelBundle/config/routes.yaml'
+```
+
+Run the bundle migration and initialize a development installation:
+
+```bash
+php bin/console doctrine:migrations:migrate
+php bin/console majpanel:init
+```
+
+`majpanel:create-admin` is an alias of `majpanel:init`. In development, the
+defaults are `admin` and `123456`, and two sample Blog records are created.
+Use `--no-demo` to skip sample data. The default password is rejected in the
+production environment.
