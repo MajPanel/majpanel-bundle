@@ -30,7 +30,7 @@
         <label for="password">Password</label>
         <input id="password" type="password" name="_password" autocomplete="current-password" required>
 
-        <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+        <input type="hidden" name="_csrf_token" value="{{ csrf_token(constant('Majpanel\\MajpanelBundle\\Security\\MajpanelAuthenticator::CSRF_TOKEN_ID')) }}">
         <button type="submit">Sign in</button>
     </form>
 </main>

@@ -49,7 +49,9 @@ final class MajpanelAuthenticatorTest extends TestCase
         self::assertSame('admin', $request->getSession()->get(SecurityRequestAttributes::LAST_USERNAME));
         self::assertSame($admin, $passport->getBadge(UserBadge::class)->getUser());
         self::assertSame('secret-password', $passport->getBadge(PasswordCredentials::class)->getPassword());
-        self::assertSame('valid-token', $passport->getBadge(CsrfTokenBadge::class)->getCsrfToken());
+        $csrfBadge = $passport->getBadge(CsrfTokenBadge::class);
+        self::assertSame(MajpanelAuthenticator::CSRF_TOKEN_ID, $csrfBadge->getCsrfTokenId());
+        self::assertSame('valid-token', $csrfBadge->getCsrfToken());
     }
 
     public function testSuccessfulAuthenticationRedirectsToTheDashboard(): void

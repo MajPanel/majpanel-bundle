@@ -27,6 +27,7 @@ final class MajpanelAuthenticator extends AbstractLoginFormAuthenticator
 
     public const LOGIN_ROUTE = 'majpanel_login';
     public const DASHBOARD_ROUTE = 'majpanel_admin_dashboard';
+    public const CSRF_TOKEN_ID = 'majpanel_authenticate';
 
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
@@ -56,7 +57,7 @@ final class MajpanelAuthenticator extends AbstractLoginFormAuthenticator
                     ->findOneBy(['username' => $identifier]),
             ),
             new PasswordCredentials($password),
-            [new CsrfTokenBadge('authenticate', $csrfToken)],
+            [new CsrfTokenBadge(self::CSRF_TOKEN_ID, $csrfToken)],
         );
     }
 
