@@ -39,7 +39,8 @@ final class MajpanelBundleTest extends TestCase
         $projectDir = sys_get_temp_dir().'/majpanel-frontend-'.bin2hex(random_bytes(6));
         $filesystem->mkdir($projectDir.'/assets');
         $filesystem->dumpFile($projectDir.'/assets/controllers.json', "{\n    \"controllers\": {},\n    \"entrypoints\": []\n}\n");
-        $filesystem->dumpFile($projectDir.'/assets/app.js', "import { startStimulusApp } from '@symfony/stimulus-bundle';\n");
+        $filesystem->dumpFile($projectDir.'/assets/app.js', "import './stimulus_bootstrap.js';\n");
+        $filesystem->dumpFile($projectDir.'/assets/stimulus_bootstrap.js', "import { startStimulusApp } from '@symfony/stimulus-bundle';\n");
         $filesystem->dumpFile($projectDir.'/webpack.config.js', <<<'JS'
 import Encore from '@symfony/webpack-encore';
 

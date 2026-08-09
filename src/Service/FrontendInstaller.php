@@ -84,9 +84,12 @@ final class FrontendInstaller
         $updated = $contents;
 
         $assetMapperApp = $this->projectDir.'/assets/app.js';
-        if (is_file($assetMapperApp)
-            && str_contains((string) file_get_contents($assetMapperApp), "from '@symfony/stimulus-bundle'")
-        ) {
+        $assetMapperBootstrap = $this->projectDir.'/assets/stimulus_bootstrap.js';
+        $usesAssetMapperStimulus = (is_file($assetMapperApp)
+                && str_contains((string) file_get_contents($assetMapperApp), "from '@symfony/stimulus-bundle'"))
+            || (is_file($assetMapperBootstrap)
+                && str_contains((string) file_get_contents($assetMapperBootstrap), "from '@symfony/stimulus-bundle'"));
+        if ($usesAssetMapperStimulus) {
             $updated = preg_replace(
                 '/\s+\.addEntry\([\'\"]app[\'\"][^\n]+\)\R/',
                 "\n",
