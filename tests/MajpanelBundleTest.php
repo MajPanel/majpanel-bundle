@@ -5,7 +5,11 @@ declare(strict_types=1);
 namespace Majpanel\MajpanelBundle\Tests;
 
 use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Resource\Factory\ResourceMetadataCollectionFactoryInterface;
+use ApiPlatform\Metadata\Resource\ResourceMetadataCollection;
 use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Majpanel\MajpanelBundle\ApiPlatform\AdminFilterMetadataCollectionFactory;
 use Majpanel\MajpanelBundle\Controller\AdminController;
 use Majpanel\MajpanelBundle\DependencyInjection\MajpanelExtension;
 use Majpanel\MajpanelBundle\Entity\Blog;
@@ -25,6 +29,30 @@ use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
 {
+    public function testAdminCollectionReceivesSortingAndExactSearchFilters(): void
+    {
+        $resource = new ApiResource(
+            routePrefix: '/admin',
+            operations: [new GetCollection(uriTemplate: '/blogs')],
+        );
+        $decorated = new class($resource) implements ResourceMetadataCollectionFactoryInterface {
+            public function __construct(private readonly ApiResource $resource)
+            {
+            }
+
+            public function create(string $resourceClass): ResourceMetadataCollection
+            {
+                return new ResourceMetadataCollection($resourceClass, [$this->resource]);
+            }
+        };
+
+        $collection = (new AdminFilterMetadataCollectionFactory($decorated))->create(Blog::class);
+        $operation = $collection->getOperation(null, true, true);
+
+        self::assertContains(AdminFilterMetadataCollectionFactory::ORDER_FILTER, $operation->getFilters());
+        self::assertContains(AdminFilterMetadataCollectionFactory::SEARCH_FILTER, $operation->getFilters());
+    }
+
     public function testBundleExcludesWebpackSourcesFromAssetMapper(): void
     {
         $container = new ContainerBuilder();

@@ -27,6 +27,16 @@ function relationLabel(value: unknown): string {
     return typeof identifier === 'string' ? identifierFromIri(identifier) : String(identifier ?? '');
 }
 
+function relationIdentifier(value: unknown): string {
+    if (typeof value === 'string') return identifierFromIri(value);
+    if (!value || typeof value !== 'object') return String(value ?? '');
+
+    const relation = value as Record<string, unknown>;
+    const identifier = relation.id ?? relation['@id'];
+
+    return typeof identifier === 'string' ? identifierFromIri(identifier) : String(identifier ?? '');
+}
+
 function relationGridUrl(field: EntityField): string | null {
     const targetApiUrl = field.relation?.targetApiUrl;
     if (!targetApiUrl) return null;
@@ -43,12 +53,17 @@ export default function RelationEntityGridValue({ field, value }: Props) {
 
     return <>{values.map((item, index) => {
         const label = relationLabel(item);
+        const identifier = relationIdentifier(item);
         if (!label) return null;
+
+        const href = gridUrl && identifier
+            ? `${gridUrl}?id=${encodeURIComponent(identifier)}`
+            : gridUrl;
 
         return <span key={`${label}-${index}`}>
             {index > 0 && ', '}
-            {gridUrl
-                ? <a className="font-medium text-blue-700 hover:underline" href={gridUrl}>{label}</a>
+            {href
+                ? <a className="font-medium text-blue-700 hover:underline" href={href}>{label}</a>
                 : label}
         </span>;
     })}</>;

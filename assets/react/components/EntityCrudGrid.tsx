@@ -58,7 +58,11 @@ function collection(data: unknown): CollectionResult {
 
 function paginatedUrl(apiUrl: string, page: number, sort: SortState | null): string {
     const url = new URL(apiUrl, window.location.origin);
+    const linkedId = new URLSearchParams(window.location.search).get('id');
     url.searchParams.set('page', String(page));
+    if (linkedId) {
+        url.searchParams.set('id', linkedId);
+    }
     if (sort) {
         url.searchParams.set(
             `order[${sort.fieldName}]`,

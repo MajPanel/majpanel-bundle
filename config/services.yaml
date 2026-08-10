@@ -16,3 +16,26 @@ services:
     Majpanel\MajpanelBundle\Service\AdminGenerator:
         arguments:
             $entityNamespace: '%majpanel.entity_namespace%'
+
+    Majpanel\MajpanelBundle\ApiPlatform\AdminFilterMetadataCollectionFactory:
+        decorates: 'api_platform.metadata.resource.metadata_collection_factory'
+        arguments:
+            $decorated: '@Majpanel\MajpanelBundle\ApiPlatform\AdminFilterMetadataCollectionFactory.inner'
+
+    majpanel.api.order_filter:
+        parent: 'api_platform.doctrine.orm.order_filter'
+        arguments:
+            $properties: ~
+            $orderParameterName: 'order'
+        tags: ['api_platform.filter']
+        autowire: false
+        autoconfigure: false
+
+    majpanel.api.search_filter:
+        parent: 'api_platform.doctrine.orm.search_filter'
+        arguments:
+            $properties:
+                id: 'exact'
+        tags: ['api_platform.filter']
+        autowire: false
+        autoconfigure: false
