@@ -1,27 +1,8 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
-import RelationAutocomplete from './RelationAutocomplete';
-import RichTextEditor from './RichTextEditor';
+import EntityFieldInput from './entity-fields/EntityFieldInput';
+import type { EntityField } from './entity-fields/types';
 
-export type EntityField = {
-    name: string;
-    label: string;
-    kind: 'text' | 'textarea' | 'number' | 'boolean' | 'date' | 'datetime' | 'json' | 'relation';
-    valueType: string;
-    required: boolean;
-    editable: boolean;
-    showInGrid?: boolean;
-    searchable?: boolean;
-    maxLength?: number;
-    step?: number;
-    relation?: {
-        type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany';
-        multiple: boolean;
-        target?: string;
-        targetApiUrl?: string;
-        optionsUrl: string;
-        labelFields: string[];
-    };
-};
+export type { EntityField, EntityFieldKind } from './entity-fields/types';
 
 export type EntityAdminConfig = {
     fields: Record<string, { editable: boolean; showInGrid: boolean; searchable: boolean }>;
@@ -237,25 +218,11 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                 <h2 className="text-xl font-semibold">{editing ? `Edit ${title}` : `Create ${title}`}</h2>
                 {fields.filter((field) => field.editable).map((field) => <label className="block" key={field.name}>
                     <span className="mb-1 block text-sm font-medium">{field.label}</span>
-                    {field.kind === 'relation' && field.relation
-                        ? <RelationAutocomplete
-                            label={field.label}
-                            optionsUrl={field.relation.optionsUrl}
-                            labelFields={field.relation.labelFields}
-                            multiple={field.relation.multiple}
-                            required={field.required}
-                            value={(field.relation.multiple
-                                ? (Array.isArray(values[field.name]) ? values[field.name] : [])
-                                : String(values[field.name] ?? '')) as string | string[]}
-                            onChange={(value) => setValues({ ...values, [field.name]: value })}
-                        />
-                        : field.kind === 'textarea'
-                            ? <RichTextEditor label={field.label} required={field.required} value={String(values[field.name] ?? '')} onChange={(value) => setValues({ ...values, [field.name]: value })} />
-                            : field.kind === 'json'
-                                ? <textarea className="min-h-28 w-full rounded border px-3 py-2" required={field.required} value={String(values[field.name] ?? '')} onChange={(event) => setValues({ ...values, [field.name]: event.target.value })} />
-                        : field.kind === 'boolean'
-                            ? <input type="checkbox" checked={Boolean(values[field.name])} onChange={(event) => setValues({ ...values, [field.name]: event.target.checked })} />
-                            : <input className="w-full rounded border px-3 py-2" type={field.kind === 'number' ? 'number' : field.kind === 'date' ? 'date' : field.kind === 'datetime' ? 'datetime-local' : 'text'} required={field.required} maxLength={field.maxLength} step={field.step} value={String(values[field.name] ?? '')} onChange={(event) => setValues({ ...values, [field.name]: event.target.value })} />}
+                    <EntityFieldInput
+                        field={field}
+                        value={values[field.name]}
+                        onChange={(value) => setValues((currentValues) => ({ ...currentValues, [field.name]: value }))}
+                    />
                 </label>)}
                 <div className="flex justify-end gap-3 pt-2"><button type="button" className="rounded border px-4 py-2" onClick={() => setEditing(undefined)}>Cancel</button><button className="rounded bg-blue-600 px-4 py-2 text-white" type="submit">Save</button></div>
             </form>
