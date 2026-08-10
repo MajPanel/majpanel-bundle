@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react';
 import EntityFieldInput from './entity-fields/EntityFieldInput';
+import RelationEntityGridValue from './entity-fields/RelationEntityGridValue';
 import type { EntityField } from './entity-fields/types';
 
 export type { EntityField, EntityFieldKind } from './entity-fields/types';
@@ -55,9 +56,15 @@ function collection(data: unknown): CollectionResult {
     return { rows: [], totalItems: 0, hasPreviousPage: false, hasNextPage: false };
 }
 
-function paginatedUrl(apiUrl: string, page: number): string {
+function paginatedUrl(apiUrl: string, page: number, sort: SortState | null): string {
     const url = new URL(apiUrl, window.location.origin);
     url.searchParams.set('page', String(page));
+    if (sort) {
+        url.searchParams.set(
+            `order[${sort.fieldName}]`,
+            sort.direction === 'ascending' ? 'asc' : 'desc',
+        );
+    }
 
     return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : url.toString();
 }
@@ -72,32 +79,14 @@ function displayValue(value: unknown): string {
     return String(value);
 }
 
-function compareFieldValues(left: unknown, right: unknown, field: EntityField): number {
-    if (left === right) return 0;
-    if (left === null || left === undefined || left === '') return 1;
-    if (right === null || right === undefined || right === '') return -1;
-
-    if (field.kind === 'number') {
-        return Number(left) - Number(right);
-    }
-    if (field.kind === 'boolean') {
-        return Number(Boolean(left)) - Number(Boolean(right));
-    }
-
-    return displayValue(left).localeCompare(displayValue(right), undefined, {
-        numeric: true,
-        sensitivity: 'base',
-    });
-}
-
 function EditIcon() {
-    return <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    return <svg aria-hidden="true" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21h-10.5A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
     </svg>;
 }
 
 function DeleteIcon() {
-    return <svg aria-hidden="true" className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    return <svg aria-hidden="true" width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
         <path strokeLinecap="round" strokeLinejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673A2.25 2.25 0 0 1 15.916 21H8.084a2.25 2.25 0 0 1-2.244-1.327L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0V4.477c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 0 0-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" />
     </svg>;
 }
@@ -143,7 +132,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         setLoading(true);
         setError('');
         try {
-            const response = await fetch(paginatedUrl(apiUrl, page), { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
+            const response = await fetch(paginatedUrl(apiUrl, page, sort), { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
             if (!response.ok) throw new Error(`Request failed (${response.status})`);
             const result = collection(await response.json());
             setRows(result.rows);
@@ -157,7 +146,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         }
     };
 
-    useEffect(() => { void load(); }, [apiUrl, page]);
+    useEffect(() => { void load(); }, [apiUrl, page, sort]);
 
     const visibleFields = fields.filter((field) => field.showInGrid !== false);
     const displayedRows = useMemo(() => {
@@ -167,21 +156,11 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
             ? rows.filter((row) => searchable.some((field) => displayValue(row[field.name]).toLocaleLowerCase().includes(query)))
             : rows;
 
-        if (!sort) return matchingRows;
-        const sortField = fields.find((field) => field.name === sort.fieldName);
-        if (!sortField) return matchingRows;
-        const direction = sort.direction === 'ascending' ? 1 : -1;
-
-        return matchingRows
-            .map((row, index) => ({ row, index }))
-            .sort((left, right) => (
-                compareFieldValues(left.row[sort.fieldName], right.row[sort.fieldName], sortField) * direction
-                || left.index - right.index
-            ))
-            .map(({ row }) => row);
-    }, [fields, rows, search, sort]);
+        return matchingRows;
+    }, [fields, rows, search]);
 
     const toggleSort = (fieldName: string) => {
+        setPage(1);
         setSort((currentSort) => ({
             fieldName,
             direction: currentSort?.fieldName === fieldName && currentSort.direction === 'ascending'
@@ -273,20 +252,24 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                 <tbody>
                     {loading && <tr><td className="px-4 py-6 text-center" colSpan={visibleFields.length + 1}>Loading…</td></tr>}
                     {!loading && displayedRows.map((row) => <tr className="border-b last:border-0" key={String(row[idField])}>
-                        {visibleFields.map((field) => <td className="max-w-xs truncate px-4 py-3" key={field.name}>{displayValue(row[field.name])}</td>)}
+                        {visibleFields.map((field) => <td className="max-w-xs truncate px-4 py-3" key={field.name}>
+                            {field.kind === 'relation'
+                                ? <RelationEntityGridValue field={field} value={row[field.name]} />
+                                : displayValue(row[field.name])}
+                        </td>)}
                         {(canUpdate || canDelete) && <td className="whitespace-nowrap px-4 py-3">
                             {canUpdate && <button
                                 aria-label={`Edit ${title} record`}
                                 title="Edit"
                                 type="button"
-                                className="mr-2 inline-flex size-9 cursor-pointer items-center justify-center rounded border border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100"
+                                className="mr-2 inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded border border-blue-200 bg-blue-50 text-blue-700 hover:border-blue-300 hover:bg-blue-100"
                                 onClick={() => openForm(row)}
                             ><EditIcon /></button>}
                             {canDelete && <button
                                 aria-label={`Delete ${title} record`}
                                 title="Delete"
                                 type="button"
-                                className="inline-flex size-9 cursor-pointer items-center justify-center rounded border border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100"
+                                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded border border-red-200 bg-red-50 text-red-700 hover:border-red-300 hover:bg-red-100"
                                 onClick={() => void remove(row)}
                             ><DeleteIcon /></button>}
                         </td>}

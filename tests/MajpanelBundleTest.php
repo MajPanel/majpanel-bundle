@@ -81,6 +81,7 @@ JS);
             self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/entity-fields/EntityFieldInput.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/RelationEntityGridValue.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/entity-fields/types.ts');
 
             $styles = (string) file_get_contents($projectDir.'/assets/styles/majpanel.css');
@@ -89,6 +90,7 @@ JS);
 
             $grid = (string) file_get_contents($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
             self::assertStringContainsString("url.searchParams.set('page', String(page))", $grid);
+            self::assertStringContainsString('`order[${sort.fieldName}]`', $grid);
             self::assertStringContainsString("object.totalItems ?? object['hydra:totalItems']", $grid);
             self::assertStringContainsString('hasNextPage', $grid);
             self::assertStringContainsString("typeof value !== 'string' || value.trim() === ''", $grid);
