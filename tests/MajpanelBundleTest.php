@@ -80,6 +80,8 @@ JS);
             self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/EntityFieldInput.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/types.ts');
 
             $styles = (string) file_get_contents($projectDir.'/assets/styles/majpanel.css');
             self::assertStringContainsString('@source "../../templates";', $styles);
@@ -89,10 +91,12 @@ JS);
             self::assertStringContainsString("url.searchParams.set('page', String(page))", $grid);
             self::assertStringContainsString("object.totalItems ?? object['hydra:totalItems']", $grid);
             self::assertStringContainsString('hasNextPage', $grid);
-            self::assertStringContainsString("type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany'", $grid);
-            self::assertStringContainsString('targetApiUrl?: string', $grid);
             self::assertStringContainsString("typeof value !== 'string' || value.trim() === ''", $grid);
             self::assertStringContainsString('value = null', $grid);
+
+            $fieldTypes = (string) file_get_contents($projectDir.'/assets/react/components/entity-fields/types.ts');
+            self::assertStringContainsString("type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany'", $fieldTypes);
+            self::assertStringContainsString('targetApiUrl?: string', $fieldTypes);
 
             $relationAutocomplete = (string) file_get_contents($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
             self::assertStringContainsString('style: { zIndex: 1500 }', $relationAutocomplete);

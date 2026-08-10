@@ -34,6 +34,10 @@ final class FrontendInstaller
             $bundleDir.'/assets/react/components/RichTextEditor.tsx' => $this->projectDir.'/assets/react/components/RichTextEditor.tsx',
         ];
 
+        foreach (glob($bundleDir.'/assets/react/components/entity-fields/*.{ts,tsx}', GLOB_BRACE) ?: [] as $source) {
+            $managedFiles[$source] = $this->projectDir.'/assets/react/components/entity-fields/'.basename($source);
+        }
+
         $installed = [];
         foreach ($files as $source => $target) {
             if (is_file($target)) {
