@@ -70,11 +70,9 @@ final class MajpanelBundleTest extends TestCase
         $generator = $reflection->newInstanceWithoutConstructor();
         $message = $reflection->getMethod('adminResourceConfigurationMessage')->invoke(
             $generator,
-            'App\\Entity\\Blog',
             'No protected route was found.',
         );
 
-        self::assertStringContainsString('Cannot generate a Majpanel admin for "App\\Entity\\Blog"', $message);
         self::assertStringContainsString("routePrefix: '/admin'", $message);
         self::assertStringContainsString("security: \"is_granted('ROLE_ADMIN')\"", $message);
         self::assertStringContainsString('stateless: false', $message);
