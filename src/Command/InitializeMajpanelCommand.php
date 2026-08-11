@@ -6,6 +6,7 @@ namespace Majpanel\MajpanelBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Majpanel\MajpanelBundle\Entity\AdminUser;
+use Majpanel\MajpanelBundle\Service\AdminGenerator;
 use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -28,6 +29,7 @@ final class InitializeMajpanelCommand extends Command
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
         private readonly FrontendInstaller $frontendInstaller,
+        private readonly AdminGenerator $adminGenerator,
         #[Autowire('%kernel.environment%')]
         private readonly string $environment,
     ) {
@@ -72,6 +74,11 @@ HELP);
         if ($installedFrontendFiles !== []) {
             $io->success(sprintf('Installed %d Majpanel frontend file(s).', count($installedFrontendFiles)));
             $io->note('Run `npm install` and `npm run dev` to compile the Majpanel CSS and React controllers.');
+        }
+
+        $removedEntities = $this->adminGenerator->synchronizeManifest();
+        if ($removedEntities !== []) {
+            $io->note('Removed stale or duplicate menu entries: '.implode(', ', $removedEntities));
         }
 
         $repository = $this->entityManager->getRepository(AdminUser::class);

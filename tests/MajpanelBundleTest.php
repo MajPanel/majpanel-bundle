@@ -81,6 +81,51 @@ final class MajpanelBundleTest extends TestCase
         self::assertStringContainsString('php bin/console cache:clear', $message);
     }
 
+    public function testGeneratorRemovesStaleManifestMenuEntries(): void
+    {
+        $filesystem = new Filesystem();
+        $projectDir = sys_get_temp_dir().'/majpanel-manifest-'.bin2hex(random_bytes(6));
+        $filesystem->dumpFile($projectDir.'/config/majpanel_entities.json', json_encode([
+            \stdClass::class => [
+                'class' => \stdClass::class,
+                'name' => 'Blog',
+                'label' => 'Blogs',
+                'slug' => 'blogs',
+                'component' => 'BlogAdmin',
+                'controller' => 'BlogController',
+                'route' => 'majpanel_admin_blogs',
+                'api_url' => '/api/admin/blogs',
+            ],
+            'Removed\\Entity\\Blog' => [
+                'class' => 'Removed\\Entity\\Blog',
+                'name' => 'Blog',
+                'label' => 'Blogs',
+                'slug' => 'blogs',
+                'component' => 'BlogAdmin',
+                'api_url' => '/api/admin/blogs',
+            ],
+        ], JSON_THROW_ON_ERROR));
+
+        try {
+            $generator = new AdminGenerator(
+                $this->createMock(\Doctrine\ORM\EntityManagerInterface::class),
+                $this->createMock(ResourceMetadataCollectionFactoryInterface::class),
+                $this->createMock(\Symfony\Component\Routing\RouterInterface::class),
+                $filesystem,
+                $projectDir,
+                'App\\Entity',
+            );
+
+            self::assertSame(['Removed\\Entity\\Blog'], $generator->synchronizeManifest());
+            $manifest = json_decode((string) file_get_contents($projectDir.'/config/majpanel_entities.json'), true, 512, JSON_THROW_ON_ERROR);
+            self::assertSame([\stdClass::class], array_keys($manifest));
+            $menu = (string) file_get_contents($projectDir.'/templates/admin/_generated_menu.html.twig');
+            self::assertSame(1, substr_count($menu, '<a'));
+        } finally {
+            $filesystem->remove($projectDir);
+        }
+    }
+
     public function testAdminCollectionReceivesSortingAndExactSearchFilters(): void
     {
         $resource = new ApiResource(

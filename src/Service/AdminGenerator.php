@@ -29,6 +29,45 @@ final class AdminGenerator
     ) {
     }
 
+    /** @return list<string> Removed entity class names. */
+    public function synchronizeManifest(): array
+    {
+        $manifest = $this->readManifest();
+        $removed = [];
+        $slugOwners = [];
+        $preferredPrefix = trim($this->entityNamespace, '\\').'\\';
+
+        foreach ($manifest as $className => $entry) {
+            if (!class_exists($className)) {
+                unset($manifest[$className]);
+                $removed[] = $className;
+                continue;
+            }
+
+            $slug = $entry['slug'];
+            $existingClass = $slugOwners[$slug] ?? null;
+            if ($existingClass === null) {
+                $slugOwners[$slug] = $className;
+                continue;
+            }
+
+            $preferCurrent = str_starts_with($className, $preferredPrefix)
+                && !str_starts_with($existingClass, $preferredPrefix);
+            $removedClass = $preferCurrent ? $existingClass : $className;
+            unset($manifest[$removedClass]);
+            $removed[] = $removedClass;
+            if ($preferCurrent) {
+                $slugOwners[$slug] = $className;
+            }
+        }
+
+        ksort($manifest);
+        $this->writeManifest($manifest);
+        $this->writeMenu($manifest);
+
+        return $removed;
+    }
+
     /**
      * @return array{entity: string, component: string, search_component: string, controller: string, template: string, api_url: string, fields: int, associations: list<string>}
      */
