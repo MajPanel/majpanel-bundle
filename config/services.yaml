@@ -39,3 +39,11 @@ services:
         tags: ['api_platform.filter']
         autowire: false
         autoconfigure: false
+
+    majpanel.api.grid_search_filter:
+        class: Majpanel\MajpanelBundle\ApiPlatform\AdminGridSearchFilter
+        arguments:
+            $managerRegistry: '@doctrine'
+        tags: ['api_platform.filter']
+        autowire: false
+        autoconfigure: false

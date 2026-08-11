@@ -61,11 +61,11 @@ Symfony Flex normally enables the bundle automatically. Without Flex, add
 - `tests/` automated tests
 - `migrations/` production migrations owned exclusively by Majpanel
 
-Application/demo migrations belong under `tests/Fixtures/Migrations/`; they
+Application migrations belong under `tests/Fixtures/Migrations/`; they
 must not be registered as production migrations by applications using the
 bundle.
 
-Generated menu examples for demo entities belong under
+Generated menu examples for test entities belong under
 `tests/Fixtures/templates/`. The runtime menu is written to the host
 application's `templates/admin/_generated_menu.html.twig` by the `majpanel`
 command.
@@ -170,8 +170,10 @@ php bin/console majpanel:init
 The initializer also installs the Majpanel React/Encore scaffold when it is
 missing, including `package.json`, the `majpanel` entry, Tailwind CSS, and the
 shared `EntityCrudGrid` component. The grid uses API Platform's server-side
-pagination links; its search box filters the currently loaded page. Compile it
-after the first initialization:
+pagination, ordering, and search filters. Each generated entity also receives
+its own `*AdminSearch.tsx` component. With no field selected, search covers
+eligible short string columns and excludes long-text/full-text fields. Compile
+it after the first initialization:
 
 ```js
 // webpack.config.js
@@ -204,12 +206,11 @@ Tailwind input from its asset map. That stylesheet is compiled exclusively by
 the Majpanel Webpack Encore entry.
 
 `majpanel:create-admin` is an alias of `majpanel:init`. In development, the
-defaults are `admin` and `123456`, and two sample Blog records are created.
-Use `--no-demo` to skip sample data. The default password is rejected in the
+defaults are `admin` and `123456`. The default password is rejected in the
 production environment.
 
 Reset an existing administrator password explicitly:
 
 ```bash
-php bin/console majpanel:create-admin admin 'a-new-password' --reset-password --no-demo
+php bin/console majpanel:create-admin admin 'a-new-password' --reset-password
 ```

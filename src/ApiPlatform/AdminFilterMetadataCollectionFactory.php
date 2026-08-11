@@ -12,6 +12,7 @@ final class AdminFilterMetadataCollectionFactory implements ResourceMetadataColl
 {
     public const ORDER_FILTER = 'majpanel.api.order_filter';
     public const SEARCH_FILTER = 'majpanel.api.search_filter';
+    public const GRID_SEARCH_FILTER = 'majpanel.api.grid_search_filter';
 
     public function __construct(
         private readonly ResourceMetadataCollectionFactoryInterface $decorated,
@@ -37,6 +38,7 @@ final class AdminFilterMetadataCollectionFactory implements ResourceMetadataColl
                     ...($operation->getFilters() ?? []),
                     self::ORDER_FILTER,
                     self::SEARCH_FILTER,
+                    self::GRID_SEARCH_FILTER,
                 ]))));
             }
 

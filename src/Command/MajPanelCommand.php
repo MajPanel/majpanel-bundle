@@ -73,6 +73,7 @@ HELP);
                 ['API collection' => $result['api_url']],
                 ['Doctrine fields' => (string) $result['fields']],
                 ['React component' => $result['component']],
+                ['Search component' => $result['search_component']],
                 ['Twig template' => $result['template']],
             );
 

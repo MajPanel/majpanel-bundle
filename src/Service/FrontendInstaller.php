@@ -30,6 +30,7 @@ final class FrontendInstaller
             $bundleDir.'/assets/majpanel.d.ts' => $this->projectDir.'/assets/majpanel.d.ts',
             $bundleDir.'/assets/styles/majpanel.css' => $this->projectDir.'/assets/styles/majpanel.css',
             $bundleDir.'/assets/react/components/EntityCrudGrid.tsx' => $this->projectDir.'/assets/react/components/EntityCrudGrid.tsx',
+            $bundleDir.'/assets/react/components/EntityGridSearch.tsx' => $this->projectDir.'/assets/react/components/EntityGridSearch.tsx',
             $bundleDir.'/assets/react/components/RelationAutocomplete.tsx' => $this->projectDir.'/assets/react/components/RelationAutocomplete.tsx',
             $bundleDir.'/assets/react/components/RichTextEditor.tsx' => $this->projectDir.'/assets/react/components/RichTextEditor.tsx',
         ];

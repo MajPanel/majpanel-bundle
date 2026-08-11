@@ -12,7 +12,7 @@ final class Version20260809100000 extends AbstractMigration
 {
     public function getDescription(): string
     {
-        return 'Create the Majpanel administrator and demo blog tables';
+        return 'Create the Majpanel administrator table';
     }
 
     public function up(Schema $schema): void
@@ -24,18 +24,10 @@ final class Version20260809100000 extends AbstractMigration
         $users->addColumn('password', Types::STRING, ['length' => 255]);
         $users->setPrimaryKey(['id']);
         $users->addUniqueIndex(['username'], 'uniq_majpanel_admin_username');
-
-        $blogs = $schema->createTable('majpanel_blog');
-        $blogs->addColumn('id', Types::INTEGER, ['autoincrement' => true]);
-        $blogs->addColumn('title', Types::STRING, ['length' => 255]);
-        $blogs->addColumn('content', Types::TEXT);
-        $blogs->addColumn('created_at', Types::DATETIME_IMMUTABLE);
-        $blogs->setPrimaryKey(['id']);
     }
 
     public function down(Schema $schema): void
     {
-        $schema->dropTable('majpanel_blog');
         $schema->dropTable('majpanel_admin_user');
     }
 }

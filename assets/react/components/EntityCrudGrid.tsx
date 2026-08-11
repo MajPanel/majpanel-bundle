@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useState, type FormEvent } from 'react';
+import { useEffect, useState, type ComponentType, type FormEvent } from 'react';
+import EntityGridSearch, { type EntityGridSearchProps } from './EntityGridSearch';
 import EntityFieldInput from './entity-fields/EntityFieldInput';
 import RelationEntityGridValue from './entity-fields/RelationEntityGridValue';
 import type { EntityField } from './entity-fields/types';
@@ -29,6 +30,7 @@ type Props = {
     canCreate: boolean;
     canUpdate: boolean;
     canDelete: boolean;
+    SearchComponent?: ComponentType<EntityGridSearchProps>;
 };
 
 const jsonHeaders = { Accept: 'application/ld+json', 'Content-Type': 'application/ld+json' };
@@ -56,7 +58,13 @@ function collection(data: unknown): CollectionResult {
     return { rows: [], totalItems: 0, hasPreviousPage: false, hasNextPage: false };
 }
 
-function paginatedUrl(apiUrl: string, page: number, sort: SortState | null): string {
+function paginatedUrl(
+    apiUrl: string,
+    page: number,
+    sort: SortState | null,
+    search: string,
+    searchField: string,
+): string {
     const url = new URL(apiUrl, window.location.origin);
     const linkedId = new URLSearchParams(window.location.search).get('id');
     url.searchParams.set('page', String(page));
@@ -68,6 +76,12 @@ function paginatedUrl(apiUrl: string, page: number, sort: SortState | null): str
             `order[${sort.fieldName}]`,
             sort.direction === 'ascending' ? 'asc' : 'desc',
         );
+    }
+    if (search.trim() !== '') {
+        url.searchParams.set('q', search.trim());
+        if (searchField !== '') {
+            url.searchParams.set('searchField', searchField);
+        }
     }
 
     return url.origin === window.location.origin ? `${url.pathname}${url.search}${url.hash}` : url.toString();
@@ -119,11 +133,22 @@ function initialValues(fields: EntityField[], record?: EntityRecord): EntityReco
     }));
 }
 
-export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCreate, canUpdate, canDelete }: Props) {
+export default function EntityCrudGrid({
+    title,
+    apiUrl,
+    idField,
+    fields,
+    canCreate,
+    canUpdate,
+    canDelete,
+    SearchComponent = EntityGridSearch,
+}: Props) {
     const [rows, setRows] = useState<EntityRecord[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
     const [search, setSearch] = useState('');
+    const [debouncedSearch, setDebouncedSearch] = useState('');
+    const [searchField, setSearchField] = useState('');
     const [page, setPage] = useState(1);
     const [totalItems, setTotalItems] = useState(0);
     const [hasPreviousPage, setHasPreviousPage] = useState(false);
@@ -136,7 +161,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         setLoading(true);
         setError('');
         try {
-            const response = await fetch(paginatedUrl(apiUrl, page, sort), { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
+            const response = await fetch(paginatedUrl(apiUrl, page, sort, debouncedSearch, searchField), { headers: { Accept: 'application/ld+json' }, credentials: 'same-origin' });
             if (!response.ok) throw new Error(`Request failed (${response.status})`);
             const result = collection(await response.json());
             setRows(result.rows);
@@ -150,18 +175,15 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
         }
     };
 
-    useEffect(() => { void load(); }, [apiUrl, page, sort]);
+    useEffect(() => {
+        const timeout = window.setTimeout(() => setDebouncedSearch(search), 300);
+
+        return () => window.clearTimeout(timeout);
+    }, [search]);
+
+    useEffect(() => { void load(); }, [apiUrl, page, sort, debouncedSearch, searchField]);
 
     const visibleFields = fields.filter((field) => field.showInGrid !== false);
-    const displayedRows = useMemo(() => {
-        const query = search.trim().toLocaleLowerCase();
-        const searchable = fields.filter((field) => field.searchable !== false);
-        const matchingRows = query
-            ? rows.filter((row) => searchable.some((field) => displayValue(row[field.name]).toLocaleLowerCase().includes(query)))
-            : rows;
-
-        return matchingRows;
-    }, [fields, rows, search]);
 
     const toggleSort = (fieldName: string) => {
         setPage(1);
@@ -229,7 +251,20 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
             <h1 className="text-2xl font-semibold text-slate-900">{title}</h1>
             {canCreate && <button className="rounded bg-blue-600 px-4 py-2 text-white hover:bg-blue-700" onClick={() => openForm(null)}>Create</button>}
         </div>
-        <input className="w-full max-w-md rounded border border-slate-300 px-3 py-2" type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search this page…" />
+        <SearchComponent
+            fields={fields}
+            query={search}
+            selectedField={searchField}
+            loading={loading}
+            onQueryChange={(query) => {
+                setPage(1);
+                setSearch(query);
+            }}
+            onSelectedFieldChange={(fieldName) => {
+                setPage(1);
+                setSearchField(fieldName);
+            }}
+        />
         {error && <div className="rounded border border-red-300 bg-red-50 p-3 text-red-700">{error}</div>}
         <div className="overflow-x-auto rounded border border-slate-200 bg-white">
             <table className="w-full border-collapse text-left text-sm">
@@ -255,7 +290,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                 })}{(canUpdate || canDelete) && <th className="border-b px-4 py-3">Actions</th>}</tr></thead>
                 <tbody>
                     {loading && <tr><td className="px-4 py-6 text-center" colSpan={visibleFields.length + 1}>Loading…</td></tr>}
-                    {!loading && displayedRows.map((row) => <tr className="border-b last:border-0" key={String(row[idField])}>
+                    {!loading && rows.map((row) => <tr className="border-b last:border-0" key={String(row[idField])}>
                         {visibleFields.map((field) => <td className="max-w-xs truncate px-4 py-3" key={field.name}>
                             {field.kind === 'relation'
                                 ? <RelationEntityGridValue field={field} value={row[field.name]} />
@@ -278,7 +313,7 @@ export default function EntityCrudGrid({ title, apiUrl, idField, fields, canCrea
                             ><DeleteIcon /></button>}
                         </td>}
                     </tr>)}
-                    {!loading && displayedRows.length === 0 && <tr><td className="px-4 py-6 text-center text-slate-500" colSpan={visibleFields.length + 1}>No records found.</td></tr>}
+                    {!loading && rows.length === 0 && <tr><td className="px-4 py-6 text-center text-slate-500" colSpan={visibleFields.length + 1}>No records found.</td></tr>}
                 </tbody>
             </table>
         </div>

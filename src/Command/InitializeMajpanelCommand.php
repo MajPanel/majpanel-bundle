@@ -6,8 +6,6 @@ namespace Majpanel\MajpanelBundle\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Majpanel\MajpanelBundle\Entity\AdminUser;
-use Majpanel\MajpanelBundle\Entity\Blog;
-use Majpanel\MajpanelBundle\Service\AdminGenerator;
 use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use Symfony\Component\Console\Attribute\AsCommand;
 use Symfony\Component\Console\Command\Command;
@@ -21,7 +19,7 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 #[AsCommand(
     name: 'majpanel:init',
-    description: 'Create the first Majpanel administrator and optional demo blog data.',
+    description: 'Create the first Majpanel administrator and install the frontend scaffold.',
     aliases: ['majpanel:create-admin'],
 )]
 final class InitializeMajpanelCommand extends Command
@@ -29,7 +27,6 @@ final class InitializeMajpanelCommand extends Command
     public function __construct(
         private readonly EntityManagerInterface $entityManager,
         private readonly UserPasswordHasherInterface $passwordHasher,
-        private readonly AdminGenerator $adminGenerator,
         private readonly FrontendInstaller $frontendInstaller,
         #[Autowire('%kernel.environment%')]
         private readonly string $environment,
@@ -42,15 +39,14 @@ final class InitializeMajpanelCommand extends Command
         $this
             ->addArgument('username', InputArgument::OPTIONAL, 'Administrator username', 'admin')
             ->addArgument('password', InputArgument::OPTIONAL, 'Administrator password', '123456')
-            ->addOption('no-demo', null, InputOption::VALUE_NONE, 'Do not create sample blog posts')
             ->addOption('reset-password', null, InputOption::VALUE_NONE, 'Replace the password when the administrator already exists')
             ->setHelp(<<<'HELP'
 Initializes a development Majpanel installation after migrations have run.
 
 Examples:
   php bin/console majpanel:init
-  php bin/console majpanel:create-admin editor 'a-strong-password' --no-demo
-  php bin/console majpanel:create-admin admin 'a-new-password' --reset-password --no-demo
+  php bin/console majpanel:create-admin editor 'a-strong-password'
+  php bin/console majpanel:create-admin admin 'a-new-password' --reset-password
 HELP);
     }
 
@@ -94,19 +90,7 @@ HELP);
             $io->note(sprintf('Majpanel administrator "%s" already exists; its password was not changed.', $username));
         }
 
-        $withDemo = !$input->getOption('no-demo');
-        if ($withDemo && $this->entityManager->getRepository(Blog::class)->count([]) === 0) {
-            $this->entityManager->persist(new Blog('Welcome to Majpanel', 'Your Majpanel administration is ready.'));
-            $this->entityManager->persist(new Blog('First steps', 'Create an API Platform entity and run the Majpanel generator.'));
-            $io->success('Created sample blog data.');
-        }
-
         $this->entityManager->flush();
-
-        if ($withDemo) {
-            $result = $this->adminGenerator->generate(Blog::class);
-            $io->success(sprintf('Generated the sample Blog admin at %s.', $result['template']));
-        }
 
         $io->warning('Change the default development password after your first login.');
 

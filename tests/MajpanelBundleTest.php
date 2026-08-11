@@ -12,9 +12,9 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Majpanel\MajpanelBundle\ApiPlatform\AdminFilterMetadataCollectionFactory;
 use Majpanel\MajpanelBundle\Controller\AdminController;
 use Majpanel\MajpanelBundle\DependencyInjection\MajpanelExtension;
-use Majpanel\MajpanelBundle\Entity\Blog;
 use Majpanel\MajpanelBundle\MajpanelBundle;
 use Majpanel\MajpanelBundle\Security\MajpanelAuthenticator;
+use Majpanel\MajpanelBundle\Service\AdminGenerator;
 use Majpanel\MajpanelBundle\Service\FrontendInstaller;
 use PHPUnit\Framework\TestCase;
 use Symfony\Bundle\SecurityBundle\SecurityBundle;
@@ -29,11 +29,22 @@ use Symfony\Component\Yaml\Yaml;
 
 final class MajpanelBundleTest extends TestCase
 {
+    public function testGeneratorRendersASeparateCustomizableSearchComponent(): void
+    {
+        $reflection = new \ReflectionClass(AdminGenerator::class);
+        $generator = $reflection->newInstanceWithoutConstructor();
+        $source = $reflection->getMethod('renderSearchComponent')->invoke($generator, 'ProductAdminSearch');
+
+        self::assertStringContainsString('function ProductAdminSearch', $source);
+        self::assertStringContainsString("from '../components/EntityGridSearch'", $source);
+        self::assertStringContainsString('<EntityGridSearch {...props} />', $source);
+    }
+
     public function testAdminCollectionReceivesSortingAndExactSearchFilters(): void
     {
         $resource = new ApiResource(
             routePrefix: '/admin',
-            operations: [new GetCollection(uriTemplate: '/blogs')],
+            operations: [new GetCollection(uriTemplate: '/items')],
         );
         $decorated = new class($resource) implements ResourceMetadataCollectionFactoryInterface {
             public function __construct(private readonly ApiResource $resource)
@@ -46,15 +57,20 @@ final class MajpanelBundleTest extends TestCase
             }
         };
 
-        $collection = (new AdminFilterMetadataCollectionFactory($decorated))->create(Blog::class);
+        $collection = (new AdminFilterMetadataCollectionFactory($decorated))->create(\stdClass::class);
         $operation = $collection->getOperation(null, true, true);
 
         self::assertContains(AdminFilterMetadataCollectionFactory::ORDER_FILTER, $operation->getFilters());
         self::assertContains(AdminFilterMetadataCollectionFactory::SEARCH_FILTER, $operation->getFilters());
+        self::assertContains(AdminFilterMetadataCollectionFactory::GRID_SEARCH_FILTER, $operation->getFilters());
     }
 
     public function testBundleExcludesWebpackSourcesFromAssetMapper(): void
     {
+        if (!interface_exists(\Symfony\Component\AssetMapper\AssetMapperInterface::class)) {
+            self::markTestSkipped('AssetMapper is not installed in this test environment.');
+        }
+
         $container = new ContainerBuilder();
         $container->registerExtension(new FrameworkExtension());
 
@@ -64,15 +80,6 @@ final class MajpanelBundleTest extends TestCase
         self::assertContains('*/assets/majpanel*', $patterns);
         self::assertContains('*/assets/styles/majpanel.css', $patterns);
         self::assertContains('*/assets/react/**/*.tsx', $patterns);
-    }
-
-    public function testDemoBlogIsAStatefulProtectedApiResource(): void
-    {
-        $resource = (new \ReflectionClass(Blog::class))->getAttributes(ApiResource::class)[0]->newInstance();
-
-        self::assertSame('/admin', $resource->getRoutePrefix());
-        self::assertSame("is_granted('ROLE_ADMIN')", $resource->getSecurity());
-        self::assertFalse($resource->getStateless());
     }
 
     public function testFrontendInstallerCreatesAnEncoreReactScaffoldWithoutOverwritingFiles(): void
@@ -106,6 +113,7 @@ JS);
             self::assertFileExists($projectDir.'/assets/majpanel.ts');
             self::assertFileExists($projectDir.'/assets/majpanel_stimulus_bootstrap.cjs');
             self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/EntityGridSearch.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
             self::assertFileExists($projectDir.'/assets/react/components/entity-fields/EntityFieldInput.tsx');
