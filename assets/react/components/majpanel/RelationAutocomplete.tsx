@@ -44,7 +44,7 @@ export default function RelationAutocomplete({
         [value],
     );
     const [options, setOptions] = useState<RelationOption[]>([]);
-    const [inputValue, setInputValue] = useState('');
+    const [query, setQuery] = useState('');
     const [loading, setLoading] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
 
@@ -58,8 +58,8 @@ export default function RelationAutocomplete({
                 fields: labelFields.join(','),
                 page: '1',
             });
-            if (inputValue.trim() !== '') {
-                parameters.set('q', inputValue.trim());
+            if (query.trim() !== '') {
+                parameters.set('q', query.trim());
             }
             selectedValues.forEach((selected) => parameters.append('selected[]', selected));
 
@@ -90,7 +90,7 @@ export default function RelationAutocomplete({
             window.clearTimeout(timer);
             controller.abort();
         };
-    }, [inputValue, labelFields, optionsUrl, selectedValues]);
+    }, [labelFields, optionsUrl, query, selectedValues]);
 
     const optionsByValue = new Map(options.map((option) => [option.value, option]));
     const selectedOptions = selectedValues.map(
@@ -103,7 +103,6 @@ export default function RelationAutocomplete({
             options={options}
             value={multiple ? selectedOptions : (selectedOptions[0] ?? null)}
             loading={loading}
-            inputValue={inputValue}
             slotProps={{
                 popper: {
                     style: { zIndex: 1500 },
@@ -114,7 +113,9 @@ export default function RelationAutocomplete({
             isOptionEqualToValue={(option, selected) => option.value === selected.value}
             onInputChange={(_event, nextInputValue, reason) => {
                 if (reason === 'input' || reason === 'clear') {
-                    setInputValue(nextInputValue);
+                    setQuery(nextInputValue);
+                } else if (reason === 'reset') {
+                    setQuery('');
                 }
             }}
             onChange={(_event, selected) => {
@@ -126,7 +127,7 @@ export default function RelationAutocomplete({
                     onChange(selectedOption?.value ?? '');
                 }
             }}
-            noOptionsText={inputValue ? 'No matching items' : 'No items'}
+            noOptionsText={query ? 'No matching items' : 'No items'}
             renderInput={(parameters) => (
                 <TextField
                     {...parameters}

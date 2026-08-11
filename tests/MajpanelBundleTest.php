@@ -70,9 +70,11 @@ final class MajpanelBundleTest extends TestCase
         $generator = $reflection->newInstanceWithoutConstructor();
         $message = $reflection->getMethod('adminResourceConfigurationMessage')->invoke(
             $generator,
+            'App\\Entity\\Blog',
             'No protected route was found.',
         );
 
+        self::assertStringContainsString('App\\Entity\\Blog', $message);
         self::assertStringContainsString("routePrefix: '/admin'", $message);
         self::assertStringContainsString("security: \"is_granted('ROLE_ADMIN')\"", $message);
         self::assertStringContainsString('stateless: false', $message);
@@ -179,6 +181,8 @@ JS);
 
             $relationAutocomplete = (string) file_get_contents($projectDir.'/assets/react/components/majpanel/RelationAutocomplete.tsx');
             self::assertStringContainsString('style: { zIndex: 1500 }', $relationAutocomplete);
+            self::assertStringNotContainsString('inputValue={', $relationAutocomplete);
+            self::assertStringContainsString("reason === 'reset'", $relationAutocomplete);
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
             self::assertStringNotContainsString(".addEntry('app', './assets/app.js')", $webpack);

@@ -324,17 +324,31 @@ export default function EntityCrudGrid({
                 <button className="cursor-pointer rounded border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50" type="button" disabled={loading || !hasNextPage} onClick={() => setPage((currentPage) => currentPage + 1)}>Next</button>
             </div>
         </nav>
-        {editing !== undefined && <div className="majpanel-modal-backdrop" role="presentation" onMouseDown={() => setEditing(undefined)}>
+        {editing !== undefined && <div
+            className="majpanel-modal-backdrop"
+            role="presentation"
+            onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                    setEditing(undefined);
+                }
+            }}
+        >
             <form className="majpanel-modal space-y-4" onSubmit={(event) => void submit(event)} onMouseDown={(event) => event.stopPropagation()}>
                 <h2 className="text-xl font-semibold">{editing ? `Edit ${title}` : `Create ${title}`}</h2>
-                {fields.filter((field) => field.editable).map((field) => <label className="block" key={field.name}>
-                    <span className="mb-1 block text-sm font-medium">{field.label}</span>
-                    <EntityFieldInput
+                {fields.filter((field) => field.editable).map((field) => {
+                    const input = <EntityFieldInput
                         field={field}
                         value={values[field.name]}
                         onChange={(value) => setValues((currentValues) => ({ ...currentValues, [field.name]: value }))}
-                    />
-                </label>)}
+                    />;
+
+                    return field.kind === 'relation' || field.kind === 'textarea'
+                        ? <div className="block" key={field.name}>{input}</div>
+                        : <label className="block" key={field.name}>
+                            <span className="mb-1 block text-sm font-medium">{field.label}</span>
+                            {input}
+                        </label>;
+                })}
                 <div className="flex justify-end gap-3 pt-2"><button type="button" className="rounded border px-4 py-2" onClick={() => setEditing(undefined)}>Cancel</button><button className="rounded bg-blue-600 px-4 py-2 text-white" type="submit">Save</button></div>
             </form>
         </div>}
