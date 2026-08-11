@@ -151,7 +151,11 @@ final class AdminGenerator
         try {
             $resources = $this->resourceMetadataFactory->create($className);
         } catch (\Throwable $exception) {
-            throw new \InvalidArgumentException(sprintf('Entity "%s" is not an API Platform resource.', $className), 0, $exception);
+            throw new \InvalidArgumentException(
+                $this->adminResourceConfigurationMessage($className, 'The entity is not an API Platform resource.'),
+                0,
+                $exception,
+            );
         }
 
         $hasCollection = false;
@@ -165,7 +169,10 @@ final class AdminGenerator
         }
 
         if (!$hasCollection) {
-            throw new \InvalidArgumentException(sprintf('API resource "%s" has no GET collection operation.', $className));
+            throw new \InvalidArgumentException($this->adminResourceConfigurationMessage(
+                $className,
+                'The API resource has no GET collection operation.',
+            ));
         }
 
         $url = $this->findCollectionUrl($className);
@@ -205,14 +212,37 @@ final class AdminGenerator
         }
 
         if ($collectionCandidates !== []) {
-            throw new \RuntimeException(sprintf(
-                'The resource "%s" has collection routes, but no protected /api/admin route. Found: %s',
+            throw new \RuntimeException($this->adminResourceConfigurationMessage(
                 $className,
-                implode(', ', $collectionCandidates),
+                'No protected /api/admin collection route was found. Existing routes: '.implode(', ', $collectionCandidates).'.',
             ));
         }
 
-        throw new \RuntimeException(sprintf('The admin GET collection route for "%s" was not found.', $className));
+        throw new \RuntimeException($this->adminResourceConfigurationMessage(
+            $className,
+            'The admin GET collection route was not found.',
+        ));
+    }
+
+    private function adminResourceConfigurationMessage(string $className, string $reason): string
+    {
+        return <<<MESSAGE
+Cannot generate a Majpanel admin for "{$className}". {$reason}
+
+Ensure the entity imports ApiResource:
+
+use ApiPlatform\Metadata\ApiResource;
+
+Then add or replace its ApiResource attribute with:
+
+#[ApiResource(
+    routePrefix: '/admin',
+    security: "is_granted('ROLE_ADMIN')",
+    stateless: false,
+)]
+
+After updating the entity, run `php bin/console cache:clear` and retry the Majpanel command.
+MESSAGE;
     }
 
     /** @return array{create: bool, update: bool, delete: bool} */

@@ -40,6 +40,23 @@ final class MajpanelBundleTest extends TestCase
         self::assertStringContainsString('<EntityGridSearch {...props} />', $source);
     }
 
+    public function testGeneratorExplainsRequiredAdminApiResourceConfiguration(): void
+    {
+        $reflection = new \ReflectionClass(AdminGenerator::class);
+        $generator = $reflection->newInstanceWithoutConstructor();
+        $message = $reflection->getMethod('adminResourceConfigurationMessage')->invoke(
+            $generator,
+            'App\\Entity\\Blog',
+            'No protected route was found.',
+        );
+
+        self::assertStringContainsString('Cannot generate a Majpanel admin for "App\\Entity\\Blog"', $message);
+        self::assertStringContainsString("routePrefix: '/admin'", $message);
+        self::assertStringContainsString("security: \"is_granted('ROLE_ADMIN')\"", $message);
+        self::assertStringContainsString('stateless: false', $message);
+        self::assertStringContainsString('php bin/console cache:clear', $message);
+    }
+
     public function testAdminCollectionReceivesSortingAndExactSearchFilters(): void
     {
         $resource = new ApiResource(
