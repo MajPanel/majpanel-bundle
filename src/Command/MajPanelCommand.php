@@ -74,6 +74,7 @@ HELP);
                 ['Doctrine fields' => (string) $result['fields']],
                 ['React component' => $result['component']],
                 ['Search component' => $result['search_component']],
+                ['Symfony controller' => $result['controller']],
                 ['Twig template' => $result['template']],
             );
 

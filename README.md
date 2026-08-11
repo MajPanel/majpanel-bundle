@@ -52,7 +52,8 @@ Symfony Flex normally enables the bundle automatically. Without Flex, add
 - `src/Repository/` persistence repositories
 - `src/Service/` application services
 - `assets/controllers/` Stimulus controllers
-- `assets/react/` React and TypeScript source files
+- `assets/react/components/majpanel/` shared Majpanel React components
+- `assets/react/controllers/majpanel/` generated entity React controllers
 - `assets/styles/` Tailwind and application styles
 - `config/` services and route definitions
 - `templates/` Twig templates
@@ -171,7 +172,8 @@ The initializer also installs the Majpanel React/Encore scaffold when it is
 missing, including `package.json`, the `majpanel` entry, Tailwind CSS, and the
 shared `EntityCrudGrid` component. The grid uses API Platform's server-side
 pagination, ordering, and search filters. Each generated entity also receives
-its own `*AdminSearch.tsx` component. With no field selected, search covers
+its own `assets/react/controllers/majpanel/*AdminSearch.tsx` component and a
+Symfony controller under `src/Controller/Majpanel/`. With no field selected, search covers
 eligible short string columns and excludes long-text/full-text fields. Compile
 it after the first initialization:
 

@@ -30,7 +30,7 @@ final class AdminGenerator
     }
 
     /**
-     * @return array{entity: string, component: string, search_component: string, template: string, api_url: string, fields: int, associations: list<string>}
+     * @return array{entity: string, component: string, search_component: string, controller: string, template: string, api_url: string, fields: int, associations: list<string>}
      */
     public function generate(string $entityName): array
     {
@@ -39,15 +39,18 @@ final class AdminGenerator
         $api = $this->readApiResource($className);
         $shortName = (new \ReflectionClass($className))->getShortName();
         $componentName = $shortName.'Admin';
+        $controllerName = $shortName.'Controller';
         $slug = $this->slugFromApiUrl($api['url'], $shortName);
+        $routeName = $this->routeNameFromSlug($slug);
         $title = $api['short_name'] ?? $shortName;
         $title = $this->humanize($this->pluralize($title));
         $fields = $this->buildFields($metadata, $className);
         $idField = $metadata->getIdentifierFieldNames()[0] ?? 'id';
 
-        $componentPath = $this->projectDir.'/assets/react/controllers/'.$componentName.'.tsx';
-        $searchComponentPath = $this->projectDir.'/assets/react/controllers/'.$componentName.'Search.tsx';
-        $templatePath = $this->projectDir.'/templates/admin/'.$slug.'/index.html.twig';
+        $componentPath = $this->projectDir.'/assets/react/controllers/majpanel/'.$componentName.'.tsx';
+        $searchComponentPath = $this->projectDir.'/assets/react/controllers/majpanel/'.$componentName.'Search.tsx';
+        $controllerPath = $this->projectDir.'/src/Controller/Majpanel/'.$controllerName.'.php';
+        $templatePath = $this->projectDir.'/templates/admin/majpanel/'.$slug.'/index.html.twig';
 
         $this->filesystem->dumpFile(
             $componentPath,
@@ -71,6 +74,15 @@ final class AdminGenerator
             $templatePath,
             $this->renderEntityTemplate($componentName, $title, $api['url']),
         );
+        $this->filesystem->dumpFile(
+            $controllerPath,
+            $this->renderSymfonyController($controllerName, $slug, $routeName),
+        );
+        $this->filesystem->remove([
+            $this->projectDir.'/assets/react/controllers/'.$componentName.'.tsx',
+            $this->projectDir.'/assets/react/controllers/'.$componentName.'Search.tsx',
+            $this->projectDir.'/templates/admin/'.$slug,
+        ]);
 
         $manifest = $this->readManifest();
         $manifest[$className] = [
@@ -79,6 +91,8 @@ final class AdminGenerator
             'label' => $title,
             'slug' => $slug,
             'component' => $componentName,
+            'controller' => $controllerName,
+            'route' => $routeName,
             'api_url' => $api['url'],
         ];
         ksort($manifest);
@@ -89,6 +103,7 @@ final class AdminGenerator
             'entity' => $className,
             'component' => $componentPath,
             'search_component' => $searchComponentPath,
+            'controller' => $controllerPath,
             'template' => $templatePath,
             'api_url' => $api['url'],
             'fields' => count($fields),
@@ -96,7 +111,7 @@ final class AdminGenerator
         ];
     }
 
-    /** @return array{entity: string, component: string|null, search_component: string|null, template: string|null} */
+    /** @return array{entity: string, component: string|null, search_component: string|null, controller: string|null, template: string|null} */
     public function delete(string $entityName): array
     {
         $className = $this->resolveEntityClass($entityName);
@@ -104,13 +119,23 @@ final class AdminGenerator
         $entry = $manifest[$className] ?? null;
 
         if ($entry === null) {
-            return ['entity' => $className, 'component' => null, 'search_component' => null, 'template' => null];
+            return ['entity' => $className, 'component' => null, 'search_component' => null, 'controller' => null, 'template' => null];
         }
 
-        $componentPath = $this->projectDir.'/assets/react/controllers/'.$entry['component'].'.tsx';
-        $searchComponentPath = $this->projectDir.'/assets/react/controllers/'.$entry['component'].'Search.tsx';
-        $templateDirectory = $this->projectDir.'/templates/admin/'.$entry['slug'];
-        $this->filesystem->remove([$componentPath, $searchComponentPath, $templateDirectory]);
+        $componentPath = $this->projectDir.'/assets/react/controllers/majpanel/'.$entry['component'].'.tsx';
+        $searchComponentPath = $this->projectDir.'/assets/react/controllers/majpanel/'.$entry['component'].'Search.tsx';
+        $controllerName = $entry['controller'] ?? $entry['name'].'Controller';
+        $controllerPath = $this->projectDir.'/src/Controller/Majpanel/'.$controllerName.'.php';
+        $templateDirectory = $this->projectDir.'/templates/admin/majpanel/'.$entry['slug'];
+        $this->filesystem->remove([
+            $componentPath,
+            $searchComponentPath,
+            $controllerPath,
+            $templateDirectory,
+            $this->projectDir.'/assets/react/controllers/'.$entry['component'].'.tsx',
+            $this->projectDir.'/assets/react/controllers/'.$entry['component'].'Search.tsx',
+            $this->projectDir.'/templates/admin/'.$entry['slug'],
+        ]);
 
         unset($manifest[$className]);
         $this->writeManifest($manifest);
@@ -120,6 +145,7 @@ final class AdminGenerator
             'entity' => $className,
             'component' => $componentPath,
             'search_component' => $searchComponentPath,
+            'controller' => $controllerPath,
             'template' => $templateDirectory,
         ];
     }
@@ -504,7 +530,7 @@ MESSAGE;
 
         return <<<TSX
 // Generated by `php bin/console majpanel`. Changes may be overwritten.
-import EntityCrudGrid, { type EntityAdminConfig, type EntityField } from '../components/EntityCrudGrid';
+import EntityCrudGrid, { type EntityAdminConfig, type EntityField } from '../../components/majpanel/EntityCrudGrid';
 import {$componentName}Search from './{$componentName}Search';
 
 type {$componentName}Props = {
@@ -558,7 +584,7 @@ TSX;
     {
         return <<<TSX
 // Generated by `php bin/console majpanel`. Customize this file for entity-specific search UI.
-import EntityGridSearch, { type EntityGridSearchProps } from '../components/EntityGridSearch';
+import EntityGridSearch, { type EntityGridSearchProps } from '../../components/majpanel/EntityGridSearch';
 
 export default function {$searchComponentName}(props: EntityGridSearchProps) {
     return <EntityGridSearch {...props} />;
@@ -666,7 +692,7 @@ TSX;
             "{%% extends '@Majpanel/admin/index.html.twig' %%}\n\n".
             "{%% block admin_title %%}%s{%% endblock %%}\n\n".
             "{%% block admin_content %%}\n".
-            "    <div {{ react_component('%s', { apiUrl: '%s' }) }}></div>\n".
+            "    <div {{ react_component('majpanel/%s', { apiUrl: '%s' }) }}></div>\n".
             "{%% endblock %%}\n",
             $title,
             $componentName,
@@ -674,7 +700,38 @@ TSX;
         );
     }
 
-    /** @return array<string, array{class: string, name: string, label: string, slug: string, component: string, api_url: string}> */
+    private function renderSymfonyController(string $controllerName, string $slug, string $routeName): string
+    {
+        return sprintf(<<<'PHP'
+<?php
+
+declare(strict_types=1);
+
+namespace App\Controller\Majpanel;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
+
+#[IsGranted('ROLE_ADMIN')]
+final class %s extends AbstractController
+{
+    #[Route('/majpanel/admin/%s', name: '%s', methods: ['GET'])]
+    public function index(): Response
+    {
+        return $this->render('admin/majpanel/%s/index.html.twig');
+    }
+}
+PHP,
+            $controllerName,
+            $slug,
+            $routeName,
+            $slug,
+        );
+    }
+
+    /** @return array<string, array<string, string>> */
     private function readManifest(): array
     {
         $path = $this->projectDir.self::MANIFEST_FILE;
@@ -687,13 +744,13 @@ TSX;
             throw new \RuntimeException('Unable to read the MajPanel entity manifest.');
         }
 
-        /** @var array<string, array{class: string, name: string, label: string, slug: string, component: string, api_url: string}> $manifest */
+        /** @var array<string, array<string, string>> $manifest */
         $manifest = json_decode($contents, true, 512, JSON_THROW_ON_ERROR);
 
         return $manifest;
     }
 
-    /** @param array<string, array{class: string, name: string, label: string, slug: string, component: string, api_url: string}> $manifest */
+    /** @param array<string, array<string, string>> $manifest */
     private function writeManifest(array $manifest): void
     {
         $this->filesystem->dumpFile(
@@ -702,17 +759,23 @@ TSX;
         );
     }
 
-    /** @param array<string, array{class: string, name: string, label: string, slug: string, component: string, api_url: string}> $manifest */
+    /** @param array<string, array<string, string>> $manifest */
     private function writeMenu(array $manifest): void
     {
         $menu = "{# Generated by `php bin/console majpanel`. #}\n";
         foreach ($manifest as $entry) {
             $label = htmlspecialchars($entry['label'], ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
-            $slug = addslashes($entry['slug']);
+            $hasGeneratedController = isset($entry['route']);
+            $routeName = addslashes($entry['route'] ?? 'majpanel_admin_entity');
+            $activeAttribute = $hasGeneratedController ? '_route' : 'entity';
+            $activeValue = addslashes($hasGeneratedController ? $routeName : $entry['slug']);
+            $href = $hasGeneratedController
+                ? "{{ path('{$routeName}') }}"
+                : "{{ path('majpanel_admin_entity', { entity: '".addslashes($entry['slug'])."' }) }}";
             $menu .= <<<TWIG
 <a
-    class="flex items-center gap-3 rounded-md border p-3 no-underline max-[700px]:flex-col max-[700px]:gap-1 max-[700px]:px-1 max-[700px]:py-2.5 max-[700px]:text-xs {{ app.request.attributes.get('entity') == '{$slug}' ? 'border-[#90caf9] bg-[#e3f2fd] text-[#1565c0]' : 'border-gray-200 text-gray-700 hover:border-[#90caf9] hover:bg-[#e3f2fd] hover:text-[#1565c0]' }}"
-    href="{{ path('majpanel_admin_entity', { entity: '{$slug}' }) }}"
+    class="flex items-center gap-3 rounded-md border p-3 no-underline max-[700px]:flex-col max-[700px]:gap-1 max-[700px]:px-1 max-[700px]:py-2.5 max-[700px]:text-xs {{ app.request.attributes.get('{$activeAttribute}') == '{$activeValue}' ? 'border-[#90caf9] bg-[#e3f2fd] text-[#1565c0]' : 'border-gray-200 text-gray-700 hover:border-[#90caf9] hover:bg-[#e3f2fd] hover:text-[#1565c0]' }}"
+    href="{$href}"
 >
     <span class="text-xl" aria-hidden="true">▣</span>
     <span>{$label}</span>
@@ -721,6 +784,11 @@ TWIG;
         }
 
         $this->filesystem->dumpFile($this->projectDir.self::MENU_FILE, $menu);
+    }
+
+    private function routeNameFromSlug(string $slug): string
+    {
+        return 'majpanel_admin_'.str_replace('-', '_', $slug);
     }
 
     private function slugFromApiUrl(string $apiUrl, string $fallback): string

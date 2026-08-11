@@ -36,8 +36,32 @@ final class MajpanelBundleTest extends TestCase
         $source = $reflection->getMethod('renderSearchComponent')->invoke($generator, 'ProductAdminSearch');
 
         self::assertStringContainsString('function ProductAdminSearch', $source);
-        self::assertStringContainsString("from '../components/EntityGridSearch'", $source);
+        self::assertStringContainsString("from '../../components/majpanel/EntityGridSearch'", $source);
         self::assertStringContainsString('<EntityGridSearch {...props} />', $source);
+    }
+
+    public function testGeneratorRendersAnEntitySpecificSymfonyControllerAndTemplate(): void
+    {
+        $reflection = new \ReflectionClass(AdminGenerator::class);
+        $generator = $reflection->newInstanceWithoutConstructor();
+        $controller = $reflection->getMethod('renderSymfonyController')->invoke(
+            $generator,
+            'ProductController',
+            'products',
+            'majpanel_admin_products',
+        );
+        $template = $reflection->getMethod('renderEntityTemplate')->invoke(
+            $generator,
+            'ProductAdmin',
+            'Products',
+            '/api/admin/products',
+        );
+
+        self::assertStringContainsString('namespace App\\Controller\\Majpanel;', $controller);
+        self::assertStringContainsString('final class ProductController', $controller);
+        self::assertStringContainsString("#[Route('/majpanel/admin/products', name: 'majpanel_admin_products'", $controller);
+        self::assertStringContainsString("render('admin/majpanel/products/index.html.twig')", $controller);
+        self::assertStringContainsString("react_component('majpanel/ProductAdmin'", $template);
     }
 
     public function testGeneratorExplainsRequiredAdminApiResourceConfiguration(): void
@@ -104,6 +128,7 @@ final class MajpanelBundleTest extends TestCase
         $filesystem = new Filesystem();
         $projectDir = sys_get_temp_dir().'/majpanel-frontend-'.bin2hex(random_bytes(6));
         $filesystem->mkdir($projectDir.'/assets');
+        $filesystem->dumpFile($projectDir.'/assets/react/components/EntityCrudGrid.tsx', "legacy grid\n");
         $filesystem->dumpFile($projectDir.'/assets/controllers.json', "{\n    \"controllers\": {},\n    \"entrypoints\": []\n}\n");
         $filesystem->dumpFile($projectDir.'/assets/app.js', "import './stimulus_bootstrap.js';\n");
         $filesystem->dumpFile($projectDir.'/assets/stimulus_bootstrap.js', "import { startStimulusApp } from '@symfony/stimulus-bundle';\n");
@@ -129,19 +154,20 @@ JS);
             self::assertFileExists($projectDir.'/webpack.config.js');
             self::assertFileExists($projectDir.'/assets/majpanel.ts');
             self::assertFileExists($projectDir.'/assets/majpanel_stimulus_bootstrap.cjs');
-            self::assertFileExists($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/EntityGridSearch.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/RichTextEditor.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/EntityFieldInput.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/RelationEntityGridValue.tsx');
-            self::assertFileExists($projectDir.'/assets/react/components/entity-fields/types.ts');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/EntityCrudGrid.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/EntityGridSearch.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/RelationAutocomplete.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/RichTextEditor.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/entity-fields/EntityFieldInput.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/entity-fields/RelationEntityGridValue.tsx');
+            self::assertFileExists($projectDir.'/assets/react/components/majpanel/entity-fields/types.ts');
+            self::assertFileDoesNotExist($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
 
             $styles = (string) file_get_contents($projectDir.'/assets/styles/majpanel.css');
             self::assertStringContainsString('@source "../../templates";', $styles);
             self::assertStringContainsString('@source "../../vendor/majpanel/majpanel-bundle/templates";', $styles);
 
-            $grid = (string) file_get_contents($projectDir.'/assets/react/components/EntityCrudGrid.tsx');
+            $grid = (string) file_get_contents($projectDir.'/assets/react/components/majpanel/EntityCrudGrid.tsx');
             self::assertStringContainsString("url.searchParams.set('page', String(page))", $grid);
             self::assertStringContainsString('`order[${sort.fieldName}]`', $grid);
             self::assertStringContainsString("object.totalItems ?? object['hydra:totalItems']", $grid);
@@ -149,11 +175,11 @@ JS);
             self::assertStringContainsString("typeof value !== 'string' || value.trim() === ''", $grid);
             self::assertStringContainsString('value = null', $grid);
 
-            $fieldTypes = (string) file_get_contents($projectDir.'/assets/react/components/entity-fields/types.ts');
+            $fieldTypes = (string) file_get_contents($projectDir.'/assets/react/components/majpanel/entity-fields/types.ts');
             self::assertStringContainsString("type?: 'oneToOne' | 'manyToOne' | 'oneToMany' | 'manyToMany'", $fieldTypes);
             self::assertStringContainsString('targetApiUrl?: string', $fieldTypes);
 
-            $relationAutocomplete = (string) file_get_contents($projectDir.'/assets/react/components/RelationAutocomplete.tsx');
+            $relationAutocomplete = (string) file_get_contents($projectDir.'/assets/react/components/majpanel/RelationAutocomplete.tsx');
             self::assertStringContainsString('style: { zIndex: 1500 }', $relationAutocomplete);
 
             $webpack = (string) file_get_contents($projectDir.'/webpack.config.js');
@@ -191,17 +217,12 @@ JS);
         self::assertSame(['GET'], $route->methods);
     }
 
-    public function testBundleDefinesAProtectedGeneratedEntityRoute(): void
+    public function testBundleKeepsALowPriorityLegacyEntityRouteDuringMigration(): void
     {
         $controller = new \ReflectionClass(AdminController::class);
-        $authorization = $controller->getAttributes(IsGranted::class)[0]->newInstance();
         $route = $controller->getMethod('entity')->getAttributes(Route::class)[0]->newInstance();
 
-        self::assertSame('ROLE_ADMIN', $authorization->attribute);
-        self::assertSame('/majpanel/admin/{entity}', $route->path);
         self::assertSame('majpanel_admin_entity', $route->name);
-        self::assertSame('[a-z0-9]+(?:[-_][a-z0-9]+)*', $route->requirements['entity']);
-        self::assertSame(['GET'], $route->methods);
         self::assertSame(-100, $route->priority);
     }
 

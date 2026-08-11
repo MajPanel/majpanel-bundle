@@ -29,14 +29,19 @@ final class FrontendInstaller
             $bundleDir.'/assets/majpanel_stimulus_bootstrap.cjs' => $this->projectDir.'/assets/majpanel_stimulus_bootstrap.cjs',
             $bundleDir.'/assets/majpanel.d.ts' => $this->projectDir.'/assets/majpanel.d.ts',
             $bundleDir.'/assets/styles/majpanel.css' => $this->projectDir.'/assets/styles/majpanel.css',
-            $bundleDir.'/assets/react/components/EntityCrudGrid.tsx' => $this->projectDir.'/assets/react/components/EntityCrudGrid.tsx',
-            $bundleDir.'/assets/react/components/EntityGridSearch.tsx' => $this->projectDir.'/assets/react/components/EntityGridSearch.tsx',
-            $bundleDir.'/assets/react/components/RelationAutocomplete.tsx' => $this->projectDir.'/assets/react/components/RelationAutocomplete.tsx',
-            $bundleDir.'/assets/react/components/RichTextEditor.tsx' => $this->projectDir.'/assets/react/components/RichTextEditor.tsx',
         ];
 
-        foreach (glob($bundleDir.'/assets/react/components/entity-fields/*.{ts,tsx}', GLOB_BRACE) ?: [] as $source) {
-            $managedFiles[$source] = $this->projectDir.'/assets/react/components/entity-fields/'.basename($source);
+        $componentSource = $bundleDir.'/assets/react/components/majpanel';
+        $componentFiles = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($componentSource, \FilesystemIterator::SKIP_DOTS),
+        );
+        foreach ($componentFiles as $source) {
+            if (!$source->isFile()) {
+                continue;
+            }
+
+            $relativePath = substr($source->getPathname(), strlen($componentSource) + 1);
+            $managedFiles[$source->getPathname()] = $this->projectDir.'/assets/react/components/majpanel/'.$relativePath;
         }
 
         $installed = [];
@@ -56,6 +61,21 @@ final class FrontendInstaller
 
             $this->filesystem->copy($source, $target, true);
             $installed[] = $target;
+        }
+
+        foreach ([
+            $this->projectDir.'/assets/react/components/EntityCrudGrid.tsx',
+            $this->projectDir.'/assets/react/components/EntityGridSearch.tsx',
+            $this->projectDir.'/assets/react/components/RelationAutocomplete.tsx',
+            $this->projectDir.'/assets/react/components/RichTextEditor.tsx',
+            $this->projectDir.'/assets/react/components/entity-fields',
+        ] as $legacyPath) {
+            if (!file_exists($legacyPath)) {
+                continue;
+            }
+
+            $this->filesystem->remove($legacyPath);
+            $installed[] = $legacyPath;
         }
 
         if ($this->installWebpackConfig(
